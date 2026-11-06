@@ -1,12 +1,12 @@
 {
-    "name": "modeller",
-    "short_name": "modeller",
+    "name": "Craggy Modeller",
+    "short_name": "Modeller",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Standalone block-model editor built on modelling_flutter.",
-    "orientation": "portrait-primary",
+    "background_color": "#111A20",
+    "theme_color": "#111A20",
+    "description": "Design block models of systems: nested areas, relationships, evidence and checks.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

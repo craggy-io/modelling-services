@@ -14,7 +14,7 @@ class ModellerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Modeller',
+    title: 'Modeller · Craggy',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(brightness: Brightness.light, useMaterial3: true, colorSchemeSeed: const Color(0xFFD9700F)),
     darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true, colorSchemeSeed: const Color(0xFFFF9A3C)),

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://craggy.io/schemas/profile.v1.schema.json",
+  "title": "Craggy model profile",
+  "description": "The node and edge kinds a model may use, where they may nest and run, and their typed properties. A model names its profile as <id>@<version>.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "version": {"type": "integer", "minimum": 1},
+    "title": {"type": "string"},
+    "requireKinds": {"type": "boolean", "description": "every node and edge must declare a kind"},
+    "nodeKinds": {"type": "object", "additionalProperties": {
+      "type": "object", "additionalProperties": false, "required": ["label"],
+      "properties": {
+        "label": {"type": "string"},
+        "children": {"type": "array", "items": {"type": "string"}, "description": "kinds that may nest directly inside; empty allows any"},
+        "properties": {"$ref": "#/$defs/properties"}
+      }}},
+    "edgeKinds": {"type": "object", "additionalProperties": {
+      "type": "object", "additionalProperties": false, "required": ["label"],
+      "properties": {
+        "label": {"type": "string"},
+        "from": {"type": "array", "items": {"type": "string"}},
+        "to": {"type": "array", "items": {"type": "string"}},
+        "undirected": {"type": "boolean"},
+        "properties": {"$ref": "#/$defs/properties"}
+      }}}
+  },
+  "$defs": {
+    "properties": {"type": "object", "additionalProperties": {
+      "type": "object", "additionalProperties": false, "required": ["type"],
+      "properties": {
+        "type": {"enum": ["string", "number", "bool"]},
+        "label": {"type": "string"},
+        "enum": {"type": "array", "items": {"type": ["string", "number", "boolean"]}},
+        "required": {"type": "boolean"}
+      }}}
+  }
+}

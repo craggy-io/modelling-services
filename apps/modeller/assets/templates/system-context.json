@@ -1,0 +1,22 @@
+{
+  "format": "craggy.model",
+  "version": 2,
+  "title": "System context",
+  "subject": "A system, its people and its neighbours",
+  "nodes": [
+    {"id": "customer", "label": "Customer", "kind": "person", "notes": "Buys things through the web shop."},
+    {"id": "shop", "label": "Web shop", "kind": "system"},
+    {"id": "web", "label": "Web app", "parent": "shop", "kind": "container", "properties": {"technology": "Flutter web"}},
+    {"id": "api", "label": "Shop API", "parent": "shop", "kind": "container", "properties": {"technology": "Go"}},
+    {"id": "db", "label": "Orders database", "parent": "shop", "kind": "container", "properties": {"technology": "PostgreSQL"}},
+    {"id": "payments", "label": "Payment provider", "kind": "external", "tags": ["third-party"]},
+    {"id": "mail", "label": "Email service", "kind": "external", "tags": ["third-party"]}
+  ],
+  "edges": [
+    {"id": "e1", "from": "customer", "to": "web", "label": "uses", "kind": "uses"},
+    {"id": "e2", "from": "web", "to": "api", "label": "calls", "kind": "calls"},
+    {"id": "e3", "from": "api", "to": "db", "label": "reads and writes", "kind": "calls"},
+    {"id": "e4", "from": "api", "to": "payments", "label": "takes payments through", "kind": "calls"},
+    {"id": "e5", "from": "api", "to": "mail", "label": "sends receipts through", "kind": "calls"}
+  ]
+}

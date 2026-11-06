@@ -1,0 +1,255 @@
+{
+  "export: app": {
+    "mermaid": "---\ntitle: Payment app\n---\nflowchart LR\n  subgraph n_app[\"Application\"]\n    n_ui[\"UI layer\"]\n    subgraph n_net[\"Network layer\"]\n      n_pinner[\"Certificate pinner\"]\n    end\n  end\n  n_native[\"Native libraries\"]\n  n_server[\"Payment server\"]\n  n_ui --\u003e|\"calls\"| n_net\n  n_net --\u003e|\"talks to\"| n_server\n  n_pinner --\u003e|\"loads\"| n_native\n  n_ui ---|\"shares data with\"| n_native\n",
+    "outline": "# Payment app\n\ncom.example.pay 4.2.1\n\n- **Application** `app`\n  - **UI layer** `ui`\n  - **Network layer** `net`: OkHttp with pinning.\n    - **Certificate pinner** `pinner`\n- **Native libraries** `native`\n- **Payment server** `server`\n\n## Relationships\n\n- `ui` -\u003e `net`: calls `e1`\n- `net` -\u003e `server`: talks to `e2`\n- `pinner` -\u003e `native`: loads `e3`\n- `ui` -- `native`: shares data with `e4`\n"
+  },
+  "export: empty": {
+    "mermaid": "---\ntitle: T\n---\nflowchart LR\n",
+    "outline": "# T\n\nS\n"
+  },
+  "export: quotes and spacing": {
+    "mermaid": "---\ntitle: Say \"hi\" now\n---\nflowchart LR\n  n_a[\"A #quot;quoted#quot;\"]\n  n_a --\u003e|\"self loop\"| n_a\n",
+    "outline": "# Say \"hi\" now\n\nS\n\nline one line two\n\n- **A \"quoted\"** `a`: multi line\n\n## Relationships\n\n- `a` -\u003e `a`: self loop `e`\n"
+  },
+  "import: hand-written mermaid": {
+    "edges": [
+      {
+        "from": "A",
+        "id": "A--B",
+        "label": "relates to",
+        "to": "B"
+      },
+      {
+        "from": "B",
+        "id": "B--DB",
+        "label": "persists to",
+        "to": "DB"
+      },
+      {
+        "from": "B",
+        "id": "B--Q",
+        "label": "publishes",
+        "to": "Q",
+        "undirected": true
+      },
+      {
+        "from": "A",
+        "id": "A--A",
+        "label": "relates to",
+        "to": "A"
+      }
+    ],
+    "format": "craggy.model",
+    "nodes": [
+      {
+        "id": "A",
+        "label": "Client"
+      },
+      {
+        "id": "B",
+        "label": "Server",
+        "parent": "Cloud"
+      },
+      {
+        "id": "DB",
+        "label": "Database"
+      },
+      {
+        "id": "Cloud",
+        "label": "Cloud zone"
+      },
+      {
+        "id": "Q",
+        "label": "Queue",
+        "parent": "Cloud"
+      }
+    ],
+    "subject": "Imported from Mermaid",
+    "title": "Untitled model",
+    "version": 2
+  },
+  "import: hand-written outline": {
+    "edges": [
+      {
+        "from": "front-end",
+        "id": "front-end--back-end",
+        "label": "calls",
+        "to": "back-end"
+      },
+      {
+        "from": "pay",
+        "id": "settle",
+        "label": "settles",
+        "to": "back-end",
+        "undirected": true
+      }
+    ],
+    "format": "craggy.model",
+    "nodes": [
+      {
+        "id": "front-end",
+        "label": "Front end"
+      },
+      {
+        "id": "basket",
+        "label": "Basket",
+        "notes": "holds items",
+        "parent": "front-end"
+      },
+      {
+        "id": "pay",
+        "label": "Checkout",
+        "parent": "front-end"
+      },
+      {
+        "id": "back-end",
+        "label": "Back end"
+      },
+      {
+        "id": "back-end-2",
+        "label": "Back end"
+      }
+    ],
+    "notes": "First draft.",
+    "subject": "A web shop",
+    "title": "Shop",
+    "version": 2
+  },
+  "import: mermaid round trip of app": {
+    "edges": [
+      {
+        "from": "ui",
+        "id": "ui--net",
+        "label": "calls",
+        "to": "net"
+      },
+      {
+        "from": "net",
+        "id": "net--server",
+        "label": "talks to",
+        "to": "server"
+      },
+      {
+        "from": "pinner",
+        "id": "pinner--native",
+        "label": "loads",
+        "to": "native"
+      },
+      {
+        "from": "ui",
+        "id": "ui--native",
+        "label": "shares data with",
+        "to": "native",
+        "undirected": true
+      }
+    ],
+    "format": "craggy.model",
+    "nodes": [
+      {
+        "id": "app",
+        "label": "Application"
+      },
+      {
+        "id": "ui",
+        "label": "UI layer",
+        "parent": "app"
+      },
+      {
+        "id": "net",
+        "label": "Network layer",
+        "parent": "app"
+      },
+      {
+        "id": "pinner",
+        "label": "Certificate pinner",
+        "parent": "net"
+      },
+      {
+        "id": "native",
+        "label": "Native libraries"
+      },
+      {
+        "id": "server",
+        "label": "Payment server"
+      }
+    ],
+    "subject": "Imported from Mermaid",
+    "title": "Payment app",
+    "version": 2
+  },
+  "import: mermaid unclosed subgraph": {
+    "error": true
+  },
+  "import: mermaid unreadable line": {
+    "error": true
+  },
+  "import: outline bad indent": {
+    "error": true
+  },
+  "import: outline round trip of app": {
+    "edges": [
+      {
+        "from": "ui",
+        "id": "e1",
+        "label": "calls",
+        "to": "net"
+      },
+      {
+        "from": "net",
+        "id": "e2",
+        "label": "talks to",
+        "to": "server"
+      },
+      {
+        "from": "pinner",
+        "id": "e3",
+        "label": "loads",
+        "to": "native"
+      },
+      {
+        "from": "ui",
+        "id": "e4",
+        "label": "shares data with",
+        "to": "native",
+        "undirected": true
+      }
+    ],
+    "format": "craggy.model",
+    "nodes": [
+      {
+        "id": "app",
+        "label": "Application"
+      },
+      {
+        "id": "ui",
+        "label": "UI layer",
+        "parent": "app"
+      },
+      {
+        "id": "net",
+        "label": "Network layer",
+        "notes": "OkHttp with pinning.",
+        "parent": "app"
+      },
+      {
+        "id": "pinner",
+        "label": "Certificate pinner",
+        "parent": "net"
+      },
+      {
+        "id": "native",
+        "label": "Native libraries"
+      },
+      {
+        "id": "server",
+        "label": "Payment server"
+      }
+    ],
+    "subject": "com.example.pay 4.2.1",
+    "title": "Payment app",
+    "version": 2
+  },
+  "import: outline unknown end": {
+    "error": true
+  }
+}

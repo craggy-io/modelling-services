@@ -1,0 +1,19 @@
+{
+  "about": "Export cases: mermaid(model) and outline(model) must equal the expected text exactly. Import cases: parsing source (format mermaid or outline) must give model, or fail when error is true.",
+  "export": [
+    {"name": "app", "model": "@app"},
+    {"name": "quotes and spacing", "model": {"format": "craggy.model", "version": 2, "title": "Say \"hi\"\n now", "subject": "S", "notes": "line one\nline two",
+      "nodes": [{"id": "a", "label": "A \"quoted\"", "notes": "multi\nline"}], "edges": [{"id": "e", "from": "a", "to": "a", "label": "self  loop"}]}},
+    {"name": "empty", "model": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S", "nodes": [], "edges": []}}
+  ],
+  "import": [
+    {"name": "mermaid round trip of app", "format": "mermaid", "source": "@mermaid:app"},
+    {"name": "hand-written mermaid", "format": "mermaid", "source": "graph TD\n  %% comment\n  A[Client] --> B(Server)\n  B -- persists to --> DB[(Database)]\n  subgraph Cloud [\"Cloud zone\"]\n    B\n    Q[Queue]\n  end\n  B ---|\"publishes\"| Q\n  classDef x fill:#fff\n  A --> A\n"},
+    {"name": "mermaid unclosed subgraph", "format": "mermaid", "source": "flowchart LR\n  subgraph a\n  b\n", "error": true},
+    {"name": "mermaid unreadable line", "format": "mermaid", "source": "flowchart LR\n  a ==|x b\n", "error": true},
+    {"name": "outline round trip of app", "format": "outline", "source": "@outline:app"},
+    {"name": "hand-written outline", "format": "outline", "source": "# Shop\n\nA web shop\n\nFirst draft.\n\n- Front end\n  - Basket: holds items\n  - **Checkout** `pay`\n- Back end\n- Back end\n\n## Relationships\n\n- Front end -> Back end: calls\n- `pay` -- back-end: settles `settle`\n"},
+    {"name": "outline bad indent", "format": "outline", "source": "# T\n\n- a\n    - b\n", "error": true},
+    {"name": "outline unknown end", "format": "outline", "source": "# T\n\n- a\n\n## Relationships\n\n- a -> z: x\n", "error": true}
+  ]
+}

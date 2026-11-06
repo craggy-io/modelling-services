@@ -1,0 +1,29 @@
+# modeller: the standalone block-model editor (design §7.7) for Windows and
+# the web. Deliberately thin: it uses only `modelling` and
+# `modelling_flutter`; features belong in the package.
+name: modeller
+description: Standalone block-model editor built on modelling_flutter.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  modelling:
+    path: ../../clients/dart/modelling
+  modelling_flutter:
+    path: ../../clients/flutter/modelling_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/templates/
+    - assets/profiles/

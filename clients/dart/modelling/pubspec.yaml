@@ -1,0 +1,14 @@
+# modelling: the pure-Dart twin of modelling-services' Go packages (design §6).
+# No Flutter dependency, so it runs in `dart test`, on the web and in a CLI.
+# The shared vectors in ../../../conformance/ are the contract with Go.
+name: modelling
+description: Block models (nodes, edges, evidence, views) with codec, validation, diff, edit, query and export.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.4.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

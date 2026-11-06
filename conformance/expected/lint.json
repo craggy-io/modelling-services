@@ -1,0 +1,240 @@
+{
+  "app against its profile": [
+    {
+      "element": "app",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "ui",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "pinner",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "native",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "server",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "server",
+      "rule": "profile.kind-required",
+      "severity": "error"
+    },
+    {
+      "element": "e1",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e2",
+      "rule": "profile.edge-ends",
+      "severity": "error"
+    },
+    {
+      "element": "e3",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e3",
+      "rule": "profile.kind-required",
+      "severity": "error"
+    },
+    {
+      "element": "e4",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e4",
+      "rule": "profile.kind-required",
+      "severity": "error"
+    }
+  ],
+  "app without a profile": [
+    {
+      "element": "app",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "ui",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "pinner",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "native",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "server",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e1",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e3",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e4",
+      "rule": "evidence.missing",
+      "severity": "info"
+    }
+  ],
+  "profile violations": [
+    {
+      "element": "app",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "cls",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "cls",
+      "rule": "profile.child",
+      "severity": "error"
+    },
+    {
+      "element": "c",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "c",
+      "rule": "profile.property-type",
+      "severity": "error"
+    },
+    {
+      "element": "c",
+      "rule": "profile.property-unknown",
+      "severity": "warning"
+    },
+    {
+      "element": "c",
+      "rule": "profile.property-enum",
+      "severity": "error"
+    },
+    {
+      "element": "x",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "x",
+      "rule": "profile.kind-unknown",
+      "severity": "error"
+    },
+    {
+      "element": "none",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "none",
+      "rule": "profile.kind-required",
+      "severity": "error"
+    },
+    {
+      "element": "e1",
+      "rule": "edge.ancestor",
+      "severity": "warning"
+    },
+    {
+      "element": "e1",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e1",
+      "rule": "profile.edge-ends",
+      "severity": "error"
+    },
+    {
+      "element": "e2",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e2",
+      "rule": "profile.kind-required",
+      "severity": "error"
+    }
+  ],
+  "structural warnings": [
+    {
+      "element": "a",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "b",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "c",
+      "rule": "label.duplicate-sibling",
+      "severity": "warning"
+    },
+    {
+      "element": "c",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e1",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e2",
+      "rule": "edge.duplicate",
+      "severity": "warning"
+    },
+    {
+      "element": "e2",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "e3",
+      "rule": "edge.ancestor",
+      "severity": "warning"
+    },
+    {
+      "element": "e3",
+      "rule": "evidence.missing",
+      "severity": "info"
+    },
+    {
+      "element": "v",
+      "rule": "view.stale",
+      "severity": "info"
+    }
+  ]
+}

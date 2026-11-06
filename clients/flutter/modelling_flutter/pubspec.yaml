@@ -1,0 +1,25 @@
+# modelling_flutter: renders and edits block models (design §7) on Flutter
+# desktop and web, on top of the pure-Dart `modelling` package. Imports
+# Flutter and `modelling` only; hosts theme it through ModelTheme and supply
+# their widgets through ModelChrome.
+name: modelling_flutter
+description: Flutter renderers, editor, theming and file sources for block models.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  modelling:
+    path: ../../dart/modelling
+  file_selector: ^1.0.3
+  web: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

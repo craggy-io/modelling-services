@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://craggy.io/schemas/model.v2.schema.json",
+  "title": "Craggy block model, format version 2",
+  "description": "Labelled nodes nested by containment (parent), labelled edges between them, typed properties, evidence references and saved views. Structural rules this schema cannot express (unique ids, existing parents and edge ends, acyclic containment, bounds) are checked by model.Validate in Go and Model.issues in Dart.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "title", "subject", "nodes", "edges"],
+  "properties": {
+    "format": {"const": "craggy.model"},
+    "version": {"const": 2},
+    "title": {"type": "string", "minLength": 1},
+    "subject": {"type": "string", "minLength": 1},
+    "notes": {"type": "string"},
+    "profile": {"type": "string", "description": "the profile the model follows, as <id>@<version>"},
+    "tags": {"$ref": "#/$defs/tags"},
+    "nodes": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/node"}},
+    "edges": {"type": "array", "maxItems": 2000, "items": {"$ref": "#/$defs/edge"}},
+    "views": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/view"}}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"},
+    "tags": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "properties": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {"pattern": "^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$"},
+      "additionalProperties": {"type": ["string", "number", "boolean"]}
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scheme", "id"],
+      "properties": {
+        "scheme": {"type": "string", "pattern": "^[a-z][a-z0-9+.-]{0,31}$", "description": "how the host resolves id: artifact, url, file or a host-defined scheme"},
+        "id": {"type": "string", "minLength": 1},
+        "selector": {"type": "string", "description": "a place inside the cited thing; descriptive, never resolved"}
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caption", "ref"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id", "description": "unique within the element; filled on decode when absent"},
+          "caption": {"type": "string", "minLength": 1},
+          "ref": {"$ref": "#/$defs/ref"}
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "label": {"type": "string", "minLength": 1},
+        "parent": {"type": "string", "description": "the containing node's id; absent or empty for top level"},
+        "kind": {"$ref": "#/$defs/id"},
+        "notes": {"type": "string"},
+        "tags": {"$ref": "#/$defs/tags"},
+        "properties": {"$ref": "#/$defs/properties"},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "link": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model"],
+          "properties": {"model": {"type": "string", "minLength": 1}, "node": {"type": "string"}}
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to", "label"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "from": {"type": "string"},
+        "to": {"type": "string"},
+        "label": {"type": "string", "minLength": 1},
+        "kind": {"$ref": "#/$defs/id"},
+        "undirected": {"type": "boolean"},
+        "notes": {"type": "string"},
+        "tags": {"$ref": "#/$defs/tags"},
+        "properties": {"$ref": "#/$defs/properties"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "renderer"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "title": {"type": "string"},
+        "renderer": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$", "description": "blocks, graph, outline, matrix, table, or a host renderer"},
+        "root": {"type": "string"},
+        "collapsed": {"type": "array", "items": {"type": "string"}},
+        "filter": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kinds": {"type": "array", "items": {"type": "string"}},
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "text": {"type": "string"},
+            "changedOnly": {"type": "boolean"}
+          }
+        },
+        "positions": {
+          "type": "object",
+          "additionalProperties": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}], "minItems": 2, "maxItems": 2}
+        },
+        "options": {"$ref": "#/$defs/properties"}
+      }
+    }
+  }
+}

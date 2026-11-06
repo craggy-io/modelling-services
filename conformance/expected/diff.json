@@ -1,0 +1,150 @@
+{
+  "added, removed and changed": {
+    "model": [
+      {
+        "field": "title",
+        "from": "T",
+        "to": "T2"
+      },
+      {
+        "field": "tags",
+        "from": [],
+        "to": [
+          "t"
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "id": "b",
+        "change": "changed",
+        "fields": [
+          {
+            "field": "label",
+            "from": "B",
+            "to": "B!"
+          },
+          {
+            "field": "parent",
+            "from": "a",
+            "to": ""
+          },
+          {
+            "field": "kind",
+            "from": "",
+            "to": "k"
+          },
+          {
+            "field": "notes",
+            "from": "old",
+            "to": ""
+          },
+          {
+            "field": "properties.p",
+            "to": 1
+          }
+        ]
+      },
+      {
+        "id": "gone",
+        "change": "removed"
+      },
+      {
+        "id": "new",
+        "change": "added"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "change": "changed",
+        "fields": [
+          {
+            "field": "to",
+            "from": "b",
+            "to": "new"
+          },
+          {
+            "field": "undirected",
+            "from": false,
+            "to": true
+          }
+        ]
+      },
+      {
+        "id": "e2",
+        "change": "removed"
+      }
+    ]
+  },
+  "identical": {},
+  "properties, tags, link and evidence": {
+    "nodes": [
+      {
+        "id": "a",
+        "change": "changed",
+        "fields": [
+          {
+            "field": "tags",
+            "from": [
+              "x"
+            ],
+            "to": [
+              "x",
+              "y"
+            ]
+          },
+          {
+            "field": "link",
+            "to": {
+              "model": "m2"
+            }
+          },
+          {
+            "field": "properties.add",
+            "to": "v"
+          },
+          {
+            "field": "properties.change",
+            "from": 1,
+            "to": 2
+          },
+          {
+            "field": "properties.drop",
+            "from": true
+          },
+          {
+            "field": "evidence",
+            "from": [
+              {
+                "id": "ev1",
+                "caption": "c",
+                "ref": {
+                  "scheme": "artifact",
+                  "id": "z"
+                }
+              }
+            ],
+            "to": []
+          }
+        ]
+      }
+    ]
+  },
+  "views compared when asked": {
+    "model": [
+      {
+        "field": "views",
+        "from": [],
+        "to": [
+          {
+            "id": "v",
+            "title": "V",
+            "renderer": "outline"
+          }
+        ]
+      }
+    ]
+  },
+  "views ignored by default": {}
+}

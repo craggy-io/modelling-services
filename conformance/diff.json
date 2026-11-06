@@ -1,0 +1,41 @@
+{
+  "about": "compare(base, revision, {views}) must equal changes (absent keys are empty lists; from/to are omitted when absent).",
+  "cases": [
+    {"name": "identical", "base": "@app", "revision": "@app", "changes": {}},
+    {"name": "added, removed and changed",
+      "base": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S",
+        "nodes": [{"id": "a", "label": "A"}, {"id": "b", "label": "B", "parent": "a", "notes": "old"}, {"id": "gone", "label": "Gone"}],
+        "edges": [{"id": "e1", "from": "a", "to": "b", "label": "uses"}, {"id": "e2", "from": "b", "to": "gone", "label": "x"}]},
+      "revision": {"format": "craggy.model", "version": 2, "title": "T2", "subject": "S", "tags": ["t"],
+        "nodes": [{"id": "new", "label": "New"}, {"id": "b", "label": "B!", "notes": "", "kind": "k", "properties": {"p": 1}}, {"id": "a", "label": "A"}],
+        "edges": [{"id": "e1", "from": "a", "to": "new", "label": "uses", "undirected": true}]}},
+    {"name": "properties, tags, link and evidence",
+      "base": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S",
+        "nodes": [{"id": "a", "label": "A", "tags": ["x"], "properties": {"keep": "1", "drop": true, "change": 1},
+          "evidence": [{"id": "ev1", "caption": "c", "ref": {"scheme": "artifact", "id": "z"}}]}], "edges": []},
+      "revision": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S",
+        "nodes": [{"id": "a", "label": "A", "tags": ["x", "y"], "properties": {"keep": "1", "change": 2, "add": "v"}, "link": {"model": "m2"}}], "edges": []}},
+    {"name": "views ignored by default", "base": "@app",
+      "revision": {"format": "craggy.model", "version": 2, "title": "Payment app", "subject": "com.example.pay 4.2.1", "profile": "craggy.profile/android-app@1",
+        "nodes": [
+          {"id": "app", "label": "Application", "kind": "app"},
+          {"id": "ui", "label": "UI layer", "parent": "app", "kind": "component", "properties": {"language": "kotlin"}},
+          {"id": "net", "label": "Network layer", "parent": "app", "kind": "component", "notes": "OkHttp with pinning.", "tags": ["attack-surface"],
+            "properties": {"language": "kotlin", "exported": false},
+            "evidence": [{"id": "ev1", "caption": "Pinner config", "ref": {"scheme": "artifact", "id": "a1", "selector": "/res/xml/nsc.xml"}}]},
+          {"id": "pinner", "label": "Certificate pinner", "parent": "net", "kind": "class"},
+          {"id": "native", "label": "Native libraries", "kind": "component", "link": {"model": "m-native"}},
+          {"id": "server", "label": "Payment server"}],
+        "edges": [
+          {"id": "e1", "from": "ui", "to": "net", "label": "calls", "kind": "calls"},
+          {"id": "e2", "from": "net", "to": "server", "label": "talks to", "kind": "calls",
+            "evidence": [{"id": "ev1", "caption": "Traffic capture", "ref": {"scheme": "artifact", "id": "a2"}}]},
+          {"id": "e3", "from": "pinner", "to": "native", "label": "loads"},
+          {"id": "e4", "from": "ui", "to": "native", "label": "shares data with", "undirected": true}],
+        "views": [{"id": "overview", "title": "Overview", "renderer": "graph"}]},
+      "changes": {}},
+    {"name": "views compared when asked", "views": true,
+      "base": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S", "nodes": [], "edges": []},
+      "revision": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S", "nodes": [], "edges": [], "views": [{"id": "v", "title": "V", "renderer": "outline"}]}}
+  ]
+}

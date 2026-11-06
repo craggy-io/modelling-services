@@ -1,0 +1,18 @@
+{
+  "id": "craggy.profile/android-app",
+  "version": 1,
+  "title": "Android application",
+  "requireKinds": true,
+  "nodeKinds": {
+    "app": {"label": "Application", "children": ["component"]},
+    "component": {"label": "Component", "children": ["component", "class"],
+      "properties": {
+        "language": {"type": "string", "enum": ["java", "kotlin", "native"]},
+        "exported": {"type": "bool"}
+      }},
+    "class": {"label": "Class"}
+  },
+  "edgeKinds": {
+    "calls": {"label": "calls", "from": ["component", "class"], "to": ["component", "class"]}
+  }
+}

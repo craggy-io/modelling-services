@@ -2,6 +2,8 @@
 // build one from their own design system (labs maps its ModelSpec and theme
 // colours); ModelTheme.fallback makes the package work with no host.
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 /// The spacing scale renderers use between pieces (theme.md §3.1).
@@ -72,8 +74,24 @@ class ModelTheme {
     required this.lintWarning,
     required this.lintInfo,
     this.motionStandard = const Duration(milliseconds: 200),
+    this.motionQuick = const Duration(milliseconds: 150),
     this.motion = reducedMotion,
-  });
+    Color? canvas,
+    Color? canvasDot,
+    Color? panel,
+    Color? divider,
+    Color? shadow,
+    this.gridRow = 44,
+    this.gridAutoColumns = 3,
+    this.gridMinWidth = 180,
+    this.panelWidth = 264,
+    this.inspectorWidth = 320,
+    this.barHeight = 48,
+  }) : _canvas = canvas,
+       _canvasDot = canvasDot,
+       _panel = panel,
+       _divider = divider,
+       _shadow = shadow;
 
   /// A theme that reads well on its own in light or dark mode. The dark
   /// one matches craggy-labs' theme.yaml (theme.md §3.4, §5.17).
@@ -128,6 +146,11 @@ class ModelTheme {
       lintError: dark ? const Color(0xFFFF6B6B) : const Color(0xFFC93C3C),
       lintWarning: dark ? const Color(0xFFFFC857) : const Color(0xFFB98A00),
       lintInfo: dark ? const Color(0xFF5AA9FF) : const Color(0xFF1F78D1),
+      canvas: dark ? const Color(0xFF161618) : const Color(0xFFF6F6F8),
+      canvasDot: dark ? const Color(0xFF2C2C31) : const Color(0xFFD5D5DC),
+      panel: dark ? const Color(0xFF1D1D20) : const Color(0xFFFFFFFF),
+      divider: dark ? const Color(0xFF303036) : const Color(0xFFE3E3E8),
+      shadow: dark ? const Color(0x73000000) : const Color(0x1A1D1D20),
     );
   }
 
@@ -200,18 +223,85 @@ class ModelTheme {
   /// The standard transition length, before [motion] scales it.
   final Duration motionStandard;
 
+  /// Short feedback transitions (drop previews, reflow), before [motion]
+  /// scales it.
+  final Duration motionQuick;
+
   /// Scales durations for reduced motion (labs passes `craggyDuration`).
   final ModelMotion motion;
+
+  final Color? _canvas;
+  final Color? _canvasDot;
+  final Color? _panel;
+  final Color? _divider;
+  final Color? _shadow;
+
+  /// The editor board's backdrop (falls back to [surface]).
+  Color get canvas => _canvas ?? surface;
+
+  /// The dots of the board's backdrop grid.
+  Color get canvasDot => _canvasDot ?? border.withValues(alpha: 0.35);
+
+  /// Side panels, top bar and status bar.
+  Color get panel => _panel ?? surface;
+
+  /// Hairline borders between panels and around grid areas.
+  Color get divider => _divider ?? border.withValues(alpha: 0.5);
+
+  /// Soft elevation under grid areas, menus and drawers.
+  Color get shadow => _shadow ?? const Color(0x33000000);
+
+  /// One row unit of a grid area's fixed height (a view size's `h`).
+  final double gridRow;
+
+  /// Auto-sized grid areas share a row this many at a time.
+  final int gridAutoColumns;
+
+  /// Auto-sized grid areas share a row only while each is at least this wide.
+  final double gridMinWidth;
+
+  /// The editor's left panel width before the user drags it.
+  final double panelWidth;
+
+  /// The editor's docked inspector width before the user drags it.
+  final double inspectorWidth;
+
+  /// The editor's top bar height.
+  final double barHeight;
 
   /// Fill for an area [depth] levels below the root.
   Color areaAt(int depth) =>
       Color.lerp(areaBackground, areaBackgroundDeep, (depth * depthStep).clamp(0, depthMax).toDouble())!;
+
+  /// Fill of a grid area [depth] levels deep: surfaces alternate so each
+  /// level reads as a layer on the one around it.
+  Color gridAreaAt(int depth) => depth.isEven ? surface : raised;
+
+  /// The height of a grid area's header: the least a card can be.
+  double get gridCardMin => gridRow + 2 * spacing.md;
+
+  /// The fewest row units whose height fits a card's header.
+  int get gridMinRows => ((gridCardMin + gap) / (gridRow + gap)).ceil();
+
+  /// A grid area's height for [rows] row units with gaps between them,
+  /// never less than [gridMinRows] so a card's header is never cut off.
+  double gridHeight(int rows) {
+    final n = math.max(rows, gridMinRows);
+    return n * gridRow + (n - 1) * gap;
+  }
 
   /// The palette colour at [index], wrapping.
   Color paletteAt(int index) => palette.isEmpty ? selectedBorder : palette[index % palette.length];
 
   /// [motionStandard] after the reduced-motion hook.
   Duration standardDuration(BuildContext context) => motion(context, motionStandard);
+
+  /// [motionQuick] after the reduced-motion hook.
+  Duration quickDuration(BuildContext context) => motion(context, motionQuick);
+
+  /// The corner radius of a shape inset [inset] inside one with [outer]
+  /// corners (default [radius]), so the two curves stay concentric.
+  double innerRadius(double inset, {double? outer}) => math.max(0, (outer ?? radius) - inset);
 
   ModelTheme copyWith({
     Color? areaBackground,
@@ -257,7 +347,19 @@ class ModelTheme {
     Color? lintWarning,
     Color? lintInfo,
     Duration? motionStandard,
+    Duration? motionQuick,
     ModelMotion? motion,
+    Color? canvas,
+    Color? canvasDot,
+    Color? panel,
+    Color? divider,
+    Color? shadow,
+    double? gridRow,
+    int? gridAutoColumns,
+    double? gridMinWidth,
+    double? panelWidth,
+    double? inspectorWidth,
+    double? barHeight,
   }) => ModelTheme(
     areaBackground: areaBackground ?? this.areaBackground,
     areaBackgroundDeep: areaBackgroundDeep ?? this.areaBackgroundDeep,
@@ -302,7 +404,19 @@ class ModelTheme {
     lintWarning: lintWarning ?? this.lintWarning,
     lintInfo: lintInfo ?? this.lintInfo,
     motionStandard: motionStandard ?? this.motionStandard,
+    motionQuick: motionQuick ?? this.motionQuick,
     motion: motion ?? this.motion,
+    canvas: canvas ?? _canvas,
+    canvasDot: canvasDot ?? _canvasDot,
+    panel: panel ?? _panel,
+    divider: divider ?? _divider,
+    shadow: shadow ?? _shadow,
+    gridRow: gridRow ?? this.gridRow,
+    gridAutoColumns: gridAutoColumns ?? this.gridAutoColumns,
+    gridMinWidth: gridMinWidth ?? this.gridMinWidth,
+    panelWidth: panelWidth ?? this.panelWidth,
+    inspectorWidth: inspectorWidth ?? this.inspectorWidth,
+    barHeight: barHeight ?? this.barHeight,
   );
 }
 

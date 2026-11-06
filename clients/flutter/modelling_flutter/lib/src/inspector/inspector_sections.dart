@@ -27,6 +27,25 @@ class InspectorSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = ModelTheme.of(context);
+    if (ModelHooks.of(context).onInspect != null) {
+      // Docked: a hairline between sections and room around each.
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: t.spacing.md, vertical: t.spacing.sm),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: t.divider, width: t.borderWidth),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(title.toUpperCase(), style: t.overline),
+            SizedBox(height: t.spacing.xs),
+            ...children,
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: EdgeInsets.only(bottom: t.spacing.md),
       child: Column(
@@ -86,6 +105,7 @@ class EvidenceSection extends StatelessWidget {
     final t = ModelTheme.of(context);
     final chrome = ModelChrome.of(context);
     final open = ModelHooks.of(context).onEvidence;
+    final docked = ModelHooks.of(context).onInspect != null;
     return InspectorSection(
       title: 'Evidence',
       children: [
@@ -116,7 +136,7 @@ class EvidenceSection extends StatelessWidget {
                     icon: Icons.open_in_new,
                     tooltip: 'Open evidence',
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      if (!docked) Navigator.of(context).pop();
                       open(e.ref);
                     },
                   ),

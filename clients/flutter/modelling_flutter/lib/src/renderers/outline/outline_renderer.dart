@@ -10,11 +10,13 @@ import '../../controller/model_controller.dart';
 import '../../controller/model_editing.dart';
 import '../../controller/model_types.dart';
 import '../../inspector/inspector.dart';
+import '../../shared/board_insets.dart';
 import '../../shared/inline_rename.dart';
 import '../../theme/model_theme.dart';
 import '../model_renderer.dart';
 import 'outline_row_view.dart';
 import 'outline_rows.dart';
+import '../../shared/no_areas.dart';
 
 /// The outline renderer.
 class OutlineRenderer extends ModelRenderer {
@@ -62,6 +64,9 @@ class _OutlineViewState extends State<OutlineView> with InlineRenameState<Outlin
   final _scroll = ScrollController();
   List<OutlineRow> _rows = const [];
 
+  /// The list's top padding (on a full-bleed board).
+  double _listTop = 0;
+
   @override
   ModelController get controller => widget.controller;
 
@@ -94,7 +99,7 @@ class _OutlineViewState extends State<OutlineView> with InlineRenameState<Outlin
     controller.focus(id);
     final at = _rows.indexWhere((r) => r.isArea && r.id == id);
     if (at < 0 || !_scroll.hasClients) return;
-    final top = at * outlineRowHeight, bottom = top + outlineRowHeight;
+    final top = _listTop + at * outlineRowHeight, bottom = top + outlineRowHeight;
     final p = _scroll.position;
     if (top < p.pixels) {
       _scroll.jumpTo(top);
@@ -173,41 +178,34 @@ class _OutlineViewState extends State<OutlineView> with InlineRenameState<Outlin
     final chrome = ModelChrome.of(context);
     final c = controller;
     _rows = outlineRows(c, t.openDepth);
+    final inset = BoardInsets.maybeOf(context);
+    _listTop = inset == null ? 0 : inset.top / 2;
     return Focus(
       focusNode: _focus,
       onKeyEvent: _key,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              if (c.trail.isNotEmpty)
-                chrome.button(
+          if (c.trail.isNotEmpty)
+            Padding(
+              padding: inset == null ? EdgeInsets.zero : EdgeInsets.fromLTRB(inset.left, inset.top, inset.right, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: chrome.button(
                   label: 'Back to parent area',
                   icon: Icons.arrow_back,
                   variant: ModelButtonVariant.ghost,
                   size: ModelButtonSize.sm,
                   onPressed: c.back,
                 ),
-              const Spacer(),
-              if (!c.readOnly)
-                chrome.button(
-                  label: 'Add area',
-                  icon: Icons.add,
-                  variant: ModelButtonVariant.ghost,
-                  size: ModelButtonSize.sm,
-                  onPressed: () {
-                    final added = c.addChild(c.region ?? '');
-                    if (added != null) startRename(added);
-                  },
-                ),
-            ],
-          ),
+              ),
+            ),
           Expanded(
             child: _rows.isEmpty
-                ? Center(child: Text('No matching areas.', style: t.small))
+                ? NoAreas(controller: c)
                 : ListView.builder(
                     controller: _scroll,
+                    padding: inset == null ? null : EdgeInsets.symmetric(vertical: _listTop),
                     itemExtent: outlineRowHeight,
                     itemCount: _rows.length,
                     itemBuilder: (context, i) => OutlineRowView(
@@ -220,6 +218,7 @@ class _OutlineViewState extends State<OutlineView> with InlineRenameState<Outlin
                       onPress: _press,
                       onRename: startRename,
                       onInspect: _inspect,
+                      gutter: inset?.left ?? 0,
                     ),
                   ),
           ),

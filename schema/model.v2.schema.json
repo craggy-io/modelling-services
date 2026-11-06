@@ -112,6 +112,20 @@
           "type": "object",
           "additionalProperties": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}], "minItems": 2, "maxItems": 2}
         },
+        "sizes": {
+          "type": "object",
+          "description": "grid layout size by node id: w tenths of the parent's content width, h row units; absent is auto",
+          "propertyNames": {"$ref": "#/$defs/id"},
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "w": {"type": "integer", "minimum": 1, "maximum": 10},
+              "h": {"type": "integer", "minimum": 1, "maximum": 20}
+            }
+          }
+        },
         "options": {"$ref": "#/$defs/properties"}
       }
     }

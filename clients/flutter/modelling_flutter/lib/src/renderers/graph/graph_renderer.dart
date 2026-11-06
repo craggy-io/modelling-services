@@ -17,6 +17,7 @@ import '../../theme/model_theme.dart';
 import '../model_renderer.dart';
 import 'graph_layout.dart';
 import 'graph_painter.dart';
+import '../../shared/no_areas.dart';
 
 /// The graph renderer.
 class GraphRenderer extends ModelRenderer {
@@ -88,7 +89,7 @@ class _GraphViewState extends State<GraphView> {
       t,
       positions: drag == null ? null : {...c.positions, drag: ((_dragFrom + _dragBy).dx, (_dragFrom + _dragBy).dy)},
     );
-    if (layout.boxes.isEmpty) return Center(child: Text('No matching areas.', style: t.small));
+    if (layout.boxes.isEmpty) return NoAreas(controller: c);
     final origin = layout.bounds.topLeft;
     return ModelCanvas(
       size: layout.bounds.size,

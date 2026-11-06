@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:modelling/modelling.dart' hide View;
 import 'package:modelling_flutter/modelling_flutter.dart';
@@ -7,6 +8,8 @@ import 'package:modelling_flutter/modelling_flutter.dart';
 import 'support/fixtures.dart';
 
 Finder inDialog(Finder f) => find.descendant(of: find.byType(Dialog), matching: f);
+
+final tagsInput = find.byKey(const ValueKey('tags-input'));
 
 Future<void> openInspector(WidgetTester tester, String label) async {
   await tester.tap(find.text(label).first);
@@ -84,17 +87,65 @@ void main() {
     expect(c.labelOf('ui'), 'Screens');
 
     await tester.enterText(inDialog(find.byKey(const ValueKey('inspector-notes'))), 'Compose UI.');
-    await tester.enterText(inDialog(find.byKey(const ValueKey('inspector-tags'))), 'ui, entry');
+    // A comma turns the text so far into a tag.
+    await tester.enterText(inDialog(tagsInput), 'ui, entry');
+    await tester.pump();
+    expect(c.model.nodeById('ui')!.tags, ['ui']);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     final n = c.model.nodeById('ui')!;
     expect(n.notes, 'Compose UI.');
     expect(n.tags, ['ui', 'entry']);
 
-    // Typing the label was one step.
+    // Each tag was one step, the notes one, and typing the label one.
     c.undo();
     c.undo();
+    expect(c.model.nodeById('ui')!.tags, isEmpty);
+    c.undo();
+    expect(c.model.nodeById('ui')!.notes, isEmpty);
+    expect(c.labelOf('ui'), 'Screens');
     c.undo();
     expect(c.labelOf('ui'), 'UI layer');
+  });
+
+  testWidgets('tags: Enter makes a chip, × and Backspace remove, duplicates are ignored, all undoable', (tester) async {
+    final c = ModelController(appModel());
+    await pumpWorkspace(tester, c);
+    await openInspector(tester, 'Network layer');
+    expect(inDialog(find.byKey(const ValueKey('tag-attack-surface'))), findsOneWidget);
+
+    await tester.enterText(inDialog(tagsInput), ' tls ');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(c.model.nodeById('net')!.tags, ['attack-surface', 'tls']);
+    expect(inDialog(find.byKey(const ValueKey('tag-tls'))), findsOneWidget);
+    // The input is cleared and keeps focus for the next tag.
+    expect(tester.widget<TextField>(inDialog(tagsInput)).controller!.text, isEmpty);
+    expect(tester.widget<TextField>(inDialog(tagsInput)).focusNode!.hasFocus, isTrue);
+
+    // A duplicate changes nothing.
+    await tester.enterText(inDialog(tagsInput), 'tls');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(c.model.nodeById('net')!.tags, ['attack-surface', 'tls']);
+
+    // Backspace in the empty input removes the last tag.
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(c.model.nodeById('net')!.tags, ['attack-surface']);
+
+    // The chip's × removes it.
+    await tester.tap(inDialog(find.byTooltip('Remove attack-surface')));
+    await tester.pump();
+    expect(c.model.nodeById('net')!.tags, isEmpty);
+    expect(inDialog(find.byKey(const ValueKey('tag-attack-surface'))), findsNothing);
+
+    c.undo();
+    expect(c.model.nodeById('net')!.tags, ['attack-surface']);
+    c.undo();
+    expect(c.model.nodeById('net')!.tags, ['attack-surface', 'tls']);
+    c.undo();
+    expect(c.model.nodeById('net')!.tags, ['attack-surface']);
   });
 
   testWidgets('evidence: open, remove, attach through the host', (tester) async {

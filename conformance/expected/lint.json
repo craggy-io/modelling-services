@@ -185,6 +185,13 @@
       "severity": "error"
     }
   ],
+  "stale sizes": [
+    {
+      "element": "v",
+      "rule": "view.stale",
+      "severity": "info"
+    }
+  ],
   "structural warnings": [
     {
       "element": "a",

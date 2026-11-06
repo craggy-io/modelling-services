@@ -47,7 +47,9 @@ A model is one JSON document: `format` `"craggy.model"`, `version` `2`. The sche
 A view is a saved way of looking at the model: `renderer` (`blocks`, `graph`, `outline`,
 `matrix`, `table`, or a host renderer), optional `root` (drill-in area), `collapsed` area ids,
 `filter` (`kinds`, `tags`, `text`, `changedOnly`), `positions` (graph renderer: node id →
-`[x, y]`) and renderer `options`. Views never change what the model says: diff ignores them unless
+`[x, y]`), `sizes` (grid blocks layout: node id → `{"w": 1–10, "h": 1–20}`, where `w` is tenths of
+the parent's content width and `h` is fixed row units; an absent field is auto, an entry sets at
+least one) and renderer `options`. Views never change what the model says: diff ignores them unless
 asked, and they may name nodes that no longer exist (lint reports `view.stale`).
 
 ## Bounds
@@ -71,7 +73,8 @@ asked, and they may name nodes that no longer exist (lint reports `view.stale`).
 `bounds.depth`, `bounds.properties`, `bounds.views`, `id.invalid`, `id.duplicate`, `label.empty`,
 `kind.invalid`, `tag.invalid`, `property.key`, `property.value`, `evidence.id`,
 `evidence.caption`, `evidence.ref`, `link.model`, `parent.self`, `parent.missing`,
-`parent.cycle`, `edge.endpoint`, `view.id`, `view.renderer`.
+`parent.cycle`, `edge.endpoint`, `view.id`, `view.renderer`, `view.size` (a size key that is not
+an id, or `w`/`h` out of range).
 
 ## Encoding and decoding
 

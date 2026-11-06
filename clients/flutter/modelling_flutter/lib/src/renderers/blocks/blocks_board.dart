@@ -16,13 +16,17 @@ import '../../workspace/model_hooks.dart';
 import 'area_box.dart';
 import 'blocks_layout.dart';
 import 'connector_painter.dart';
+import 'grid_canvas.dart';
 import 'relationships_list.dart';
+import '../../shared/no_areas.dart';
 
-/// The nested-blocks board for [controller].
+/// The nested-blocks board for [controller]; [grid] lays areas out on the
+/// 10-column grid with resize handles (see [BlocksRenderer.grid]).
 class BlocksBoard extends StatefulWidget {
-  const BlocksBoard({super.key, required this.controller});
+  const BlocksBoard({super.key, required this.controller, this.grid = false});
 
   final ModelController controller;
+  final bool grid;
 
   @override
   State<BlocksBoard> createState() => _BlocksBoardState();
@@ -189,8 +193,10 @@ class _BlocksBoardState extends State<BlocksBoard> with InlineRenameState<Blocks
             SizedBox(height: t.spacing.xs),
           ],
           Expanded(
-            child: empty
-                ? Center(child: Text('No matching areas.', style: t.small))
+            child: widget.grid
+                ? GridCanvas(board: this, layout: layout, diagram: _diagram, drawn: _drawn, onInspectEdge: inspectEdge)
+                : empty
+                ? NoAreas(controller: c)
                 : SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,

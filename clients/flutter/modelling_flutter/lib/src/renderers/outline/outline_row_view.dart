@@ -12,6 +12,9 @@ import '../../shared/relationship_row.dart';
 import '../../theme/model_theme.dart';
 import 'outline_rows.dart';
 
+/// The trailing actions column every area row reserves at its right edge.
+const outlineActionsWidth = 28.0;
+
 class OutlineRowView extends StatelessWidget {
   const OutlineRowView({
     super.key,
@@ -24,6 +27,7 @@ class OutlineRowView extends StatelessWidget {
     required this.onPress,
     required this.onRename,
     required this.onInspect,
+    this.gutter = 0,
   });
 
   final OutlineRow row;
@@ -35,6 +39,10 @@ class OutlineRowView extends StatelessWidget {
   final ValueChanged<String> onPress;
   final ValueChanged<String> onRename;
   final ValueChanged<ModelElementRef> onInspect;
+
+  /// Space kept at both ends of the row on a full-bleed board; the row's
+  /// highlight then spans the board edge to edge.
+  final double gutter;
 
   @override
   Widget build(BuildContext context) => row.isArea ? _area(context) : _edge(context);
@@ -61,11 +69,11 @@ class OutlineRowView extends StatelessWidget {
           );
     final content = Container(
       key: ValueKey('outline-${row.id}'),
-      padding: EdgeInsets.only(left: row.depth * t.indent, right: t.spacing.xxs),
+      padding: EdgeInsets.only(left: gutter + row.depth * t.indent, right: gutter + t.spacing.xxs),
       decoration: BoxDecoration(
         color: selected || focused ? t.raised : null,
         border: Border.all(color: focused ? t.focus : const Color(0x00000000), width: t.borderWidth),
-        borderRadius: BorderRadius.circular(t.radius),
+        borderRadius: gutter > 0 ? null : BorderRadius.circular(t.radius),
       ),
       child: Row(
         children: [
@@ -79,20 +87,35 @@ class OutlineRowView extends StatelessWidget {
                     onPressed: () => c.toggleFolded(row.id, folded: row.folded),
                   ),
           ),
-          Flexible(child: label),
-          if (kind.isNotEmpty && !renaming) ...[
-            SizedBox(width: t.spacing.xs),
-            Flexible(
-              flex: 0,
-              child: Text(kind, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.small),
+          // The label, kind and marks take the row; the actions keep a
+          // fixed column at its right edge, whatever the label's width.
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(child: label),
+                if (kind.isNotEmpty && !renaming) ...[
+                  SizedBox(width: t.spacing.xs),
+                  Flexible(
+                    flex: 0,
+                    child: Text(kind, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.small),
+                  ),
+                ],
+                ...elementMarks(context, c, row.id, edge: false),
+              ],
             ),
-          ],
-          ...elementMarks(context, c, row.id, edge: false),
-          const Spacer(),
-          chrome.iconButton(
-            icon: Icons.info_outline,
-            tooltip: 'Inspect ${n.label}',
-            onPressed: () => onInspect(ModelElementRef.node(row.id)),
+          ),
+          SizedBox(width: t.spacing.xxs),
+          SizedBox(
+            key: ValueKey('outline-actions-${row.id}'),
+            width: outlineActionsWidth,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: chrome.iconButton(
+                icon: Icons.info_outline,
+                tooltip: 'Inspect ${n.label}',
+                onPressed: () => onInspect(ModelElementRef.node(row.id)),
+              ),
+            ),
           ),
         ],
       ),
@@ -121,7 +144,7 @@ class OutlineRowView extends StatelessWidget {
     final e = c.edgeOrGhost(row.edgeId!)!;
     return Padding(
       key: ValueKey('outline-edge-${e.id}'),
-      padding: EdgeInsets.only(left: row.depth * t.indent + 28),
+      padding: EdgeInsets.only(left: gutter + row.depth * t.indent + 28, right: gutter),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => c.hover(e.id),

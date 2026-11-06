@@ -93,7 +93,15 @@ type View struct {
 	Collapsed []string              `json:"collapsed,omitempty"`
 	Filter    *Filter               `json:"filter,omitempty"`
 	Positions map[string][2]float64 `json:"positions,omitempty"`
+	Sizes     map[string]Size       `json:"sizes,omitempty"`
 	Options   Properties            `json:"options,omitempty"`
+}
+
+// Size is a node's box in a grid layout: W tenths of its parent's content
+// width (1–10) and H fixed row units (1–20). Zero is auto.
+type Size struct {
+	W int `json:"w,omitempty"`
+	H int `json:"h,omitempty"`
 }
 
 // Filter narrows the elements shown or searched. Empty fields match all.
@@ -207,6 +215,13 @@ func (v View) Clone() View {
 			p[k] = xy
 		}
 		v.Positions = p
+	}
+	if v.Sizes != nil {
+		sz := make(map[string]Size, len(v.Sizes))
+		for k, wh := range v.Sizes {
+			sz[k] = wh
+		}
+		v.Sizes = sz
 	}
 	v.Options = v.Options.Clone()
 	return v

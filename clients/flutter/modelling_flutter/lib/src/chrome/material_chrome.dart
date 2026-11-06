@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/model_theme.dart';
+import 'material_menu.dart';
 import 'model_chrome.dart';
 
 /// The default [ModelChrome].
@@ -35,6 +36,8 @@ class MaterialModelChrome extends ModelChrome {
       final style = TextButton.styleFrom(
         backgroundColor: fill,
         foregroundColor: fg,
+        disabledBackgroundColor: fill == null ? null : t.raised,
+        disabledForegroundColor: t.muted,
         minimumSize: Size(0, small ? 28 : 32),
         padding: EdgeInsets.symmetric(horizontal: variant == ModelButtonVariant.link ? 4 : (small ? 10 : 12)),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -68,18 +71,29 @@ class MaterialModelChrome extends ModelChrome {
     builder: (context) {
       final t = ModelTheme.of(context);
       final small = size == ModelButtonSize.sm;
+      final side = small ? 28.0 : 32.0;
+      // A fixed square with no padding, so the glyph sits on its centre
+      // whatever the density or the hover shape.
       return _material(
         IconButton(
           onPressed: onPressed,
           tooltip: tooltip,
           icon: Icon(icon, size: small ? 16 : t.iconSize),
           color: color ?? t.muted,
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.all(small ? 4 : 6),
-          constraints: BoxConstraints.tightFor(width: small ? 28 : 32, height: small ? 28 : 32),
+          padding: EdgeInsets.zero,
+          alignment: Alignment.center,
+          constraints: BoxConstraints.tightFor(width: side, height: side),
           style: IconButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(t.radius)),
+            fixedSize: Size.square(side),
+            minimumSize: Size.square(side),
+            maximumSize: Size.square(side),
+            padding: EdgeInsets.zero,
+            hoverColor: t.hover,
+            highlightColor: t.hover,
+            disabledForegroundColor: t.muted.withValues(alpha: 0.4),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(t.innerRadius(2))),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.standard,
           ),
         ),
       );
@@ -127,6 +141,7 @@ class MaterialModelChrome extends ModelChrome {
     hintText: hint,
     errorText: error,
     prefixIcon: prefix,
+    prefixIconConstraints: prefix == null ? null : const BoxConstraints(minWidth: 36, minHeight: 32),
     isDense: dense,
     filled: true,
     fillColor: t.raised,
@@ -243,33 +258,76 @@ class MaterialModelChrome extends ModelChrome {
 
   @override
   Widget menuButton({Key? key, required IconData icon, required String tooltip, required List<ModelMenuItem> items}) =>
+      MaterialMenuAnchor(
+        key: key,
+        entries: items,
+        trigger: (open) => iconButton(icon: icon, tooltip: tooltip, size: ModelButtonSize.md, onPressed: open),
+      );
+
+  @override
+  Widget menu({Key? key, required String label, required List<ModelMenuEntry> entries}) => MaterialMenuAnchor(
+    key: key,
+    entries: entries,
+    trigger: (open) =>
+        button(label: label, variant: ModelButtonVariant.ghost, size: ModelButtonSize.sm, onPressed: open),
+  );
+
+  @override
+  Widget tagChip({Key? key, required String label, VoidCallback? onRemove}) => Builder(
+    key: key,
+    builder: (context) {
+      final t = ModelTheme.of(context);
+      return Container(
+        height: 22,
+        padding: EdgeInsets.only(left: t.spacing.xs, right: onRemove == null ? t.spacing.xs : 2),
+        decoration: BoxDecoration(
+          color: t.focus.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(t.innerRadius(4)),
+          border: Border.all(color: t.focus.withValues(alpha: 0.35), width: t.borderWidth),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: t.small.copyWith(color: t.text, height: 1.2),
+              ),
+            ),
+            if (onRemove != null)
+              _material(
+                InkResponse(
+                  onTap: onRemove,
+                  radius: 10,
+                  child: Tooltip(
+                    message: 'Remove $label',
+                    child: SizedBox.square(
+                      dimension: 18,
+                      child: Center(child: Icon(Icons.close_rounded, size: 12, color: t.muted)),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    },
+  );
+
+  @override
+  Widget fieldFrame({Key? key, required Widget child, required bool focused, required bool empty, String? label}) =>
       Builder(
         key: key,
         builder: (context) {
           final t = ModelTheme.of(context);
           return _material(
-            PopupMenuButton<int>(
-              tooltip: tooltip,
-              icon: Icon(icon, size: t.iconSize, color: t.muted),
-              color: t.surface,
-              onSelected: (i) => items[i].onSelected(),
-              itemBuilder: (_) => [
-                for (var i = 0; i < items.length; i++)
-                  PopupMenuItem(
-                    value: i,
-                    child: Row(
-                      children: [
-                        if (items[i].icon != null) ...[
-                          Icon(items[i].icon, size: 16, color: t.muted),
-                          SizedBox(width: t.spacing.xs),
-                        ],
-                        Flexible(
-                          child: Text(items[i].label, style: t.standard, overflow: TextOverflow.ellipsis),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+            InputDecorator(
+              isFocused: focused,
+              isEmpty: empty,
+              decoration: _decoration(t, label: label),
+              child: child,
             ),
           );
         },

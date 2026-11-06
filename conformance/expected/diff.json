@@ -131,6 +131,37 @@
       }
     ]
   },
+  "view sizes compared when asked": {
+    "model": [
+      {
+        "field": "views",
+        "from": [
+          {
+            "id": "v",
+            "renderer": "blocks",
+            "sizes": {
+              "a": {
+                "w": 5
+              }
+            }
+          }
+        ],
+        "to": [
+          {
+            "id": "v",
+            "renderer": "blocks",
+            "sizes": {
+              "a": {
+                "w": 3,
+                "h": 2
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "view sizes ignored by default": {},
   "views compared when asked": {
     "model": [
       {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../chrome/model_chrome.dart';
 import '../controller/model_controller.dart';
+import '../controller/model_editing.dart';
 import '../renderers/model_renderer.dart';
 import '../theme/model_theme.dart';
 import 'model_export.dart';
@@ -97,6 +98,13 @@ class _WorkspaceToolbarState extends State<WorkspaceToolbar> {
           ),
         ),
       if (!c.readOnly) ...[
+        chrome.button(
+          key: const ValueKey('add-area'),
+          label: 'Add area',
+          icon: Icons.add,
+          size: ModelButtonSize.sm,
+          onPressed: c.addArea,
+        ),
         chrome.iconButton(
           icon: Icons.undo,
           tooltip: 'Undo',

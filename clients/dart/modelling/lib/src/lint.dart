@@ -83,7 +83,7 @@ List<Finding> lint(ModelIndex ix, [Profile? profile]) {
 
   for (final v in m.views) {
     final stale = <String>[];
-    for (final id in [v.root, ...v.collapsed, ...sortedKeys(v.positions)]) {
+    for (final id in [v.root, ...v.collapsed, ...sortedKeys(v.positions), ...sortedKeys(v.sizes)]) {
       if (ix.node(id) == null && id != '' && !stale.contains(id)) stale.add(id);
     }
     if (stale.isNotEmpty) {

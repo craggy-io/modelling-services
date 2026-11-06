@@ -41,6 +41,10 @@ class ModelController extends ChangeNotifier {
   /// The last refused gesture or failed edit, for the workspace to show.
   final notice = ValueNotifier<String?>(null);
 
+  /// An area a renderer should start renaming in place (set by
+  /// [ModelEditing.addArea]); the renderer that handles it clears it.
+  final renameRequest = ValueNotifier<String?>(null);
+
   // ---- Model, base, history ----
 
   Model get model => _history.model;
@@ -118,18 +122,20 @@ class ModelController extends ChangeNotifier {
   }
 
   /// Runs [ops] as one undoable step. Throws [EditException] (and changes
-  /// nothing) when an operation or the result is invalid.
-  Model apply(List<Op> ops) {
-    _history.apply(ops);
+  /// nothing) when an operation or the result is invalid. Typing into one
+  /// field merges into one step unless [merge] is false (a discrete edit,
+  /// such as adding a tag).
+  Model apply(List<Op> ops, {bool merge = true}) {
+    _history.apply(ops, merge: merge);
     _changed();
     return model;
   }
 
   /// [apply], reporting a failure through [notice] instead of throwing.
   /// Returns whether the ops applied.
-  bool tryApply(List<Op> ops) {
+  bool tryApply(List<Op> ops, {bool merge = true}) {
     try {
-      apply(ops);
+      apply(ops, merge: merge);
       return true;
     } on EditException catch (e) {
       notice.value = e.issues.isEmpty ? e.message : e.issues.first.message;
@@ -360,6 +366,7 @@ class ModelController extends ChangeNotifier {
   set renderer(String id) {
     if (id == _renderer) return;
     _renderer = id;
+    renameRequest.value = null; // a rename the old renderer never took up
     notifyListeners();
   }
 
@@ -390,7 +397,7 @@ class ModelController extends ChangeNotifier {
 
   View? _saved(String id) => model.views.where((v) => v.id == id).firstOrNull;
 
-  /// The current view state as a saved view. Graph positions and options
+  /// The current view state as a saved view. Graph positions, grid sizes and options
   /// carry over from the saved view with [id].
   View currentView(String id, {String title = ''}) {
     final f = filter;
@@ -401,6 +408,7 @@ class ModelController extends ChangeNotifier {
       title: title,
       renderer: _renderer,
       positions: saved?.positions ?? const {},
+      sizes: saved?.sizes ?? const {},
       options: saved?.options ?? const {},
       root: region ?? '',
       collapsed: [
@@ -425,15 +433,35 @@ class ModelController extends ChangeNotifier {
   /// Saves node positions into the active view (or a new "layout" view),
   /// as one undoable `view.put`. [replace] drops the other positions, so
   /// `setPositions({}, replace: true)` returns to auto layout.
-  bool setPositions(Map<String, Position> moved, {bool replace = false}) {
+  bool setPositions(Map<String, Position> moved, {bool replace = false}) =>
+      _putActiveView((v) => v.copyWith(positions: replace ? moved : {...v.positions, ...moved}));
+
+  /// The active view's grid sizes by node id (absent: auto).
+  Map<String, NodeSize> get sizes => _saved(_activeView ?? '')?.sizes ?? const {};
+
+  /// Saves grid sizes into the active view (or a new "layout" view), as one
+  /// undoable `view.put`; a null size returns that area to auto.
+  bool setSizes(Map<String, NodeSize?> changed) => _putActiveView(
+    (v) => v.copyWith(
+      sizes: {
+        for (final e in {...v.sizes, ...changed}.entries)
+          if (e.value case final NodeSize size) e.key: size,
+      },
+    ),
+  );
+
+  /// Writes [change] of the active view (a new "layout" view when none is
+  /// active) as one `view.put`, then makes it the active view.
+  bool _putActiveView(View Function(View saved) change) {
     final id = _activeView ?? 'layout';
-    final saved = _saved(id) ?? currentView(id);
-    final next = saved.copyWith(positions: replace ? moved : {...saved.positions, ...moved});
-    if (!tryApply([Op.viewPut(next)])) return false;
+    if (!tryApply([Op.viewPut(change(_saved(id) ?? currentView(id)))])) return false;
     _activeView = id;
     notifyListeners();
     return true;
   }
+
+  /// The blocks board's zoom (1 is 100%), shown in the editor's status bar.
+  final zoom = ValueNotifier<double>(1);
 
   /// Host overlays the workspace can show.
   List<ModelOverlay> get overlays => _overlays;
@@ -463,6 +491,8 @@ class ModelController extends ChangeNotifier {
   void dispose() {
     hovered.dispose();
     notice.dispose();
+    renameRequest.dispose();
+    zoom.dispose();
     super.dispose();
   }
 }

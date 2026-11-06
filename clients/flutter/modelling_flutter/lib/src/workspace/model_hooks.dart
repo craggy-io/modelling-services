@@ -21,15 +21,29 @@ typedef ModelAttachHook = FutureOr<void> Function(ModelElementRef element);
 /// Opens the model a node links to.
 typedef ModelLinkHook = void Function(Link link);
 
+/// Shows an element in a docked inspector instead of a dialog.
+typedef ModelInspectHook = void Function(ModelElementRef element);
+
 /// The host callbacks renderers and the inspector call. A null hook hides
 /// its action.
 @immutable
 class ModelHooks {
-  const ModelHooks({this.onEvidence, this.onAttachEvidence, this.onOpenLink, this.openLabel = 'Open', this.captureKey});
+  const ModelHooks({
+    this.onEvidence,
+    this.onAttachEvidence,
+    this.onOpenLink,
+    this.onInspect,
+    this.openLabel = 'Open',
+    this.captureKey,
+  });
 
   final ModelEvidenceHook? onEvidence;
   final ModelAttachHook? onAttachEvidence;
   final ModelLinkHook? onOpenLink;
+
+  /// When set, inspecting selects the element and calls this (the editor's
+  /// docked inspector) rather than opening a dialog.
+  final ModelInspectHook? onInspect;
 
   /// The label of the inspector's open-link action.
   final String openLabel;

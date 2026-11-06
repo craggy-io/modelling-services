@@ -607,3 +607,11 @@ The decisions in §10 were taken as recommended. Changes from the proposal:
 - **Graph and matrix PNG export captures what is in view**, since both cull to the viewport.
 - **The modeller app's dirty prompt covers New, templates, Import and Open**, not closing the window or
   tab (that needs a window plugin on desktop and `beforeunload` on the web).
+- **Area sizes are view data.** A view's `sizes` maps a node id to `{w, h}`: `w` in tenths of the
+  parent's content width (1–10), `h` in fixed rows (1–20), either omitted for auto. They are layout, not
+  content, so they live beside `positions` and change through `view.put` (`ModelController.setSizes`).
+  `Validate` checks the key is an id and the values are in range (`view.size`); a size for an id that no
+  longer exists is a `view.stale` lint finding, as positions are, so deleting a sized area leaves the
+  model valid.
+- **The grid layout is a blocks mode, off by default** (`BlocksRenderer(grid: true)`), so craggy-labs'
+  board is unchanged. `ModelEditor` is a new shell beside `ModelWorkspace`, which labs keeps using.

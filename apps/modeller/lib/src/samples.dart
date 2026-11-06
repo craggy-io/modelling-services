@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:modelling/modelling.dart' hide View;
 import 'package:modelling_flutter/modelling_flutter.dart';
 
-/// Every renderer the package ships, in switcher order.
+/// Every renderer the package ships, in switcher order; blocks on the grid.
 const modellerRenderers = <ModelRenderer>[
-  BlocksRenderer(),
+  BlocksRenderer(grid: true),
   OutlineRenderer(),
   GraphRenderer(),
   MatrixRenderer(),

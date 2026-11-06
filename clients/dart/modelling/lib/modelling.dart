@@ -28,6 +28,7 @@ export 'src/model.dart'
         Ref,
         Link,
         View,
+        NodeSize,
         Filter,
         isScalarValue,
         fillEvidenceIds;

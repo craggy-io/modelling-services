@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:modelling/modelling.dart' hide View;
 import 'package:modelling_flutter/modelling_flutter.dart';
 
 import 'support/fixtures.dart';
@@ -45,13 +46,66 @@ void main() {
     expect(c.index.children('app').map(c.labelOf), ['UI layer', 'Data', 'Network layer']);
   });
 
-  testWidgets('add a top-level area from the root', (tester) async {
+  testWidgets('Add area adds at the top level when nothing is selected', (tester) async {
     final c = ModelController(appModel());
     await pumpWorkspace(tester, c);
-    await tester.tap(find.byTooltip('Add area'));
+    await tester.tap(find.byKey(const ValueKey('add-area')));
     await tester.pumpAndSettle();
     await typeAndSubmit(tester, find.byKey(const ValueKey('rename-field')), 'Backend');
     expect(c.index.children('').map(c.labelOf), contains('Backend'));
+  });
+
+  testWidgets('Add area adds inside the selected area', (tester) async {
+    final c = ModelController(appModel());
+    await pumpWorkspace(tester, c);
+    c.select(const ModelElementRef.node('net'));
+    await tester.tap(find.byKey(const ValueKey('add-area')));
+    await tester.pumpAndSettle();
+    await typeAndSubmit(tester, find.byKey(const ValueKey('rename-field')), 'Cache');
+    expect(c.index.children('net').map(c.labelOf), contains('Cache'));
+  });
+
+  testWidgets('an empty model says how to start, and Add area starts it', (tester) async {
+    final c = ModelController(Model(title: 'T', subject: 'S'));
+    await pumpWorkspace(tester, c, renderers: allRenderers);
+    expect(find.text('No areas yet. Use "Add area" to start.'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('add-area')));
+    await tester.pumpAndSettle();
+    await typeAndSubmit(tester, find.byKey(const ValueKey('rename-field')), 'First');
+    expect(c.model.nodes.map((n) => n.label), ['First']);
+  });
+
+  testWidgets('a second Add area takes the keyboard again', (tester) async {
+    final c = ModelController(Model(title: 'T', subject: 'S'));
+    await pumpWorkspace(tester, c);
+    for (final name in ['Outer', 'Inner']) {
+      await tester.tap(find.byKey(const ValueKey('add-area')));
+      await tester.pumpAndSettle();
+      final field = find.descendant(
+        of: find.byKey(const ValueKey('rename-field')),
+        matching: find.byType(EditableText),
+      );
+      expect(tester.widget<EditableText>(field).focusNode.hasFocus, isTrue, reason: name);
+      await typeAndSubmit(tester, find.byKey(const ValueKey('rename-field')), name);
+    }
+    expect(c.model.nodes.map((n) => (n.label, n.parent)), [('Outer', ''), ('Inner', c.model.nodes.first.id)]);
+  });
+
+  testWidgets('Add area in the outline names the new area inline', (tester) async {
+    final c = ModelController(
+      Model(title: 'T', subject: 'S'),
+      renderer: 'outline',
+    );
+    await pumpWorkspace(tester, c);
+    await tester.tap(find.byKey(const ValueKey('add-area')));
+    await tester.pumpAndSettle();
+    await typeAndSubmit(tester, find.byKey(const ValueKey('rename-field')), 'First');
+    expect(c.model.nodes.map((n) => n.label), ['First']);
+  });
+
+  testWidgets('a read-only model has no Add area', (tester) async {
+    await pumpWorkspace(tester, ModelController(appModel(), readOnly: true));
+    expect(find.byKey(const ValueKey('add-area')), findsNothing);
   });
 
   testWidgets('rename by double-click, Escape cancels', (tester) async {

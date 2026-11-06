@@ -8,6 +8,7 @@ import '../../chrome/model_chrome.dart';
 import '../../controller/model_controller.dart';
 import '../../controller/model_types.dart';
 import '../../inspector/inspector.dart';
+import '../../shared/board_insets.dart';
 import '../../shared/markers.dart';
 import '../../shared/shown_elements.dart';
 import '../../theme/model_theme.dart';
@@ -107,65 +108,83 @@ class _TableViewState extends State<TableView> {
     final t = ModelTheme.of(context);
     final chrome = ModelChrome.of(context);
     final c = _c;
-    final columns = tableColumns(c, edges: _edges);
-    if (_sort != null && !columns.any((col) => col.id == _sort)) _sort = null;
-    final rows = _rows(columns);
-    const lead = 40.0;
-    final width = lead + columns.fold(0.0, (w, col) => w + col.width);
+    final natural = tableColumns(c, edges: _edges);
+    if (_sort != null && !natural.any((col) => col.id == _sort)) _sort = null;
+    final rows = _rows(natural);
+    final inset = BoardInsets.maybeOf(context);
+    final gutter = inset?.left ?? 0;
+    // The row's leading column (inspect), with the board's gutter on a
+    // full-bleed board so rows and their highlight reach the edges.
+    final lead = 40.0 + gutter;
+    final trail = inset?.right ?? 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            chrome.filterChip(
-              key: const ValueKey('table-areas'),
-              label: 'Areas',
-              selected: !_edges,
-              onPressed: () => setState(() => _edges = false),
-            ),
-            SizedBox(width: t.spacing.xs),
-            chrome.filterChip(
-              key: const ValueKey('table-relationships'),
-              label: 'Relationships',
-              selected: _edges,
-              onPressed: () => setState(() => _edges = true),
-            ),
-            SizedBox(width: t.spacing.sm),
-            Expanded(
-              child: chrome.searchField(
-                key: const ValueKey('table-filter'),
-                controller: _filter,
-                hint: 'Filter rows',
-                onChanged: (_) => setState(() {}),
+        Padding(
+          padding: inset == null ? EdgeInsets.zero : inset.copyWith(bottom: 0),
+          child: Row(
+            children: [
+              chrome.filterChip(
+                key: const ValueKey('table-areas'),
+                label: 'Areas',
+                selected: !_edges,
+                onPressed: () => setState(() => _edges = false),
               ),
-            ),
-          ],
+              SizedBox(width: t.spacing.xs),
+              chrome.filterChip(
+                key: const ValueKey('table-relationships'),
+                label: 'Relationships',
+                selected: _edges,
+                onPressed: () => setState(() => _edges = true),
+              ),
+              SizedBox(width: t.spacing.sm),
+              Expanded(
+                child: chrome.searchField(
+                  key: const ValueKey('table-filter'),
+                  controller: _filter,
+                  hint: 'Filter rows',
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+            ],
+          ),
         ),
         SizedBox(height: t.spacing.xs),
         Expanded(
-          child: Scrollbar(
-            controller: _horizontal,
-            child: SingleChildScrollView(
-              controller: _horizontal,
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: width,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _header(context, columns, lead),
-                    Expanded(
-                      child: rows.isEmpty
-                          ? Center(child: Text('No matching rows.', style: t.small))
-                          : ListView.builder(
-                              itemCount: rows.length,
-                              itemBuilder: (context, i) => _row(context, rows[i], columns, lead),
-                            ),
+          child: LayoutBuilder(
+            builder: (context, bounds) {
+              // Columns keep their widths and scroll sideways when they do
+              // not fit; when they do, they widen to fill the board.
+              final sum = natural.fold(0.0, (w, col) => w + col.width);
+              final room = bounds.maxWidth - lead - trail;
+              final columns = room > sum && sum > 0 ? [for (final col in natural) col.widened(room / sum)] : natural;
+              final width = lead + columns.fold(0.0, (w, col) => w + col.width) + trail;
+              return Scrollbar(
+                controller: _horizontal,
+                child: SingleChildScrollView(
+                  controller: _horizontal,
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _header(context, columns, lead),
+                        Expanded(
+                          child: rows.isEmpty
+                              ? Center(child: Text('No matching rows.', style: t.small))
+                              : ListView.builder(
+                                  padding: inset == null ? null : EdgeInsets.only(bottom: inset.bottom),
+                                  itemCount: rows.length,
+                                  itemBuilder: (context, i) => _row(context, rows[i], columns, lead, gutter),
+                                ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ],
@@ -209,7 +228,7 @@ class _TableViewState extends State<TableView> {
     );
   }
 
-  Widget _row(BuildContext context, ModelElementRef ref, List<TableColumn> columns, double lead) {
+  Widget _row(BuildContext context, ModelElementRef ref, List<TableColumn> columns, double lead, double gutter) {
     final t = ModelTheme.of(context);
     final chrome = ModelChrome.of(context);
     final c = _c;
@@ -239,8 +258,10 @@ class _TableViewState extends State<TableView> {
             opacity: ghost ? 0.55 : 1,
             child: Row(
               children: [
-                SizedBox(
+                Container(
                   width: lead,
+                  padding: EdgeInsets.only(left: gutter),
+                  alignment: Alignment.center,
                   child: chrome.iconButton(
                     icon: Icons.info_outline,
                     tooltip: 'Inspect $label',

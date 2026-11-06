@@ -1,7 +1,9 @@
-// modeller_home.dart: the editor: a File menu (new, templates, import,
-// open, save, save as, export), a profile picker, the gallery, and a
-// ModelWorkspace with every renderer over the open model. Unsaved edits
-// are confirmed before they are discarded.
+// modeller_home.dart: the editor: a ModelEditor (grid blocks, palette,
+// docked inspector, every renderer) over the open model, with the app's
+// File menu (new, templates, import, open, save, save as, export) at the
+// start of its top bar and the gallery among its actions. The profile
+// picker is the editor's model overview. Unsaved edits are confirmed
+// before they are discarded.
 
 import 'package:flutter/material.dart';
 import 'package:modelling/modelling.dart' hide View;
@@ -113,103 +115,72 @@ class _ModellerHomeState extends State<ModellerHome> {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GalleryPage(bundled: widget.bundled)));
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(listenable: _c, builder: _build);
-
-  Widget _build(BuildContext context, Widget? _) {
-    final c = _c;
-    final t = ModelTheme.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                _menu(),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: t.spacing.sm),
-                  child: Text(
-                    '${c.model.title}${c.dirty ? ' •' : ''}',
-                    key: const ValueKey('modeller-title'),
-                    style: t.heading,
-                  ),
-                ),
-                const Spacer(),
-                SizedBox(
-                  width: 240,
-                  child: ModelChrome.of(context).select<Profile?>(
-                    key: const ValueKey('profile-picker'),
-                    label: 'Profile',
-                    value: c.profile,
-                    options: [
-                      const ModelOption<Profile?>(null, 'No profile'),
-                      for (final p in widget.bundled.profiles)
-                        ModelOption<Profile?>(p, p.title.isEmpty ? p.id : p.title),
-                    ],
-                    onChanged: (p) => c.useProfile(p),
-                  ),
-                ),
-                SizedBox(width: t.spacing.sm),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(t.spacing.md),
-                child: RepaintBoundary(
-                  key: _exportKey,
-                  child: ModelWorkspace(
-                    key: ObjectKey(c),
-                    controller: c,
-                    renderers: modellerRenderers,
-                    exportName: exportStem(c.model),
-                    onSave: _store,
-                    onOpenLink: (link) => c.notice.value = 'Open ${link.model} with File › Open.',
-                    onEvidence: (ref) => c.notice.value = 'Evidence ${ref.scheme}:${ref.id}${ref.selector}',
-                  ),
-                ),
-              ),
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: RepaintBoundary(
+        key: _exportKey,
+        child: ModelEditor(
+          key: ObjectKey(_c),
+          controller: _c,
+          renderers: modellerRenderers,
+          profiles: widget.bundled.profiles,
+          exportName: exportStem(_c.model),
+          onSave: _store,
+          onOpenLink: (link) => _c.notice.value = 'Open ${link.model} with File › Open.',
+          onEvidence: (ref) => _c.notice.value = 'Evidence ${ref.scheme}:${ref.id}${ref.selector}',
+          leading: _menu(),
+          shortcuts: {ModelKeys.newModel: _newBlank, ModelKeys.open: _open, ModelKeys.saveAs: () => _save(asNew: true)},
+          actions: [
+            ModelEditorAction(
+              key: const ValueKey('open-gallery'),
+              label: 'Gallery',
+              icon: Icons.grid_view_rounded,
+              onPressed: _openGallery,
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _menu() => MenuBar(
-    style: const MenuStyle(
-      elevation: WidgetStatePropertyAll(0),
-      backgroundColor: WidgetStatePropertyAll(Colors.transparent),
     ),
-    children: [
-      SubmenuButton(
-        menuChildren: [
-          MenuItemButton(onPressed: _newBlank, child: const Text('New blank')),
-          SubmenuButton(
-            menuChildren: [
-              for (final t in modellerTemplates) MenuItemButton(onPressed: () => _newFrom(t), child: Text(t.title)),
-            ],
-            child: const Text('New from template'),
-          ),
-          MenuItemButton(onPressed: _import, child: const Text('Import Mermaid or outline…')),
-          MenuItemButton(onPressed: _open, child: const Text('Open…')),
-          const Divider(),
-          MenuItemButton(onPressed: _save, child: const Text('Save')),
-          MenuItemButton(onPressed: () => _save(asNew: true), child: const Text('Save as…')),
-          const Divider(),
-          SubmenuButton(
-            menuChildren: [
-              for (final e in ModelExport.values)
-                MenuItemButton(
-                  onPressed: () => runExport(_c, e, stem: exportStem(_c.model), capture: _exportKey),
-                  child: Text(e.label),
-                ),
-            ],
-            child: const Text('Export'),
-          ),
-        ],
-        child: const Text('File'),
+  );
+
+  /// The File menu, drawn by the editor's chrome like its other menus.
+  Widget _menu() => ModelChrome.of(context).menu(
+    key: const ValueKey('file-menu'),
+    label: 'File',
+    entries: [
+      ModelMenuItem(
+        label: 'New blank',
+        icon: Icons.note_add_outlined,
+        shortcut: ModelKeys.newModel,
+        onSelected: _newBlank,
       ),
-      MenuItemButton(onPressed: _openGallery, child: const Text('Gallery')),
+      ModelSubmenu(
+        label: 'New from template',
+        icon: Icons.dashboard_customize_outlined,
+        entries: [for (final t in modellerTemplates) ModelMenuItem(label: t.title, onSelected: () => _newFrom(t))],
+      ),
+      ModelMenuItem(label: 'Import Mermaid or outline…', icon: Icons.input_rounded, onSelected: _import),
+      ModelMenuItem(label: 'Open…', icon: Icons.folder_open_outlined, shortcut: ModelKeys.open, onSelected: _open),
+      const ModelMenuDivider(),
+      ModelMenuItem(label: 'Save', icon: Icons.save_outlined, shortcut: ModelKeys.save, onSelected: _save),
+      ModelMenuItem(
+        label: 'Save as…',
+        icon: Icons.save_as_outlined,
+        shortcut: ModelKeys.saveAs,
+        onSelected: () => _save(asNew: true),
+      ),
+      const ModelMenuDivider(),
+      ModelSubmenu(
+        label: 'Export',
+        icon: Icons.ios_share_rounded,
+        entries: [
+          for (final e in ModelExport.values)
+            ModelMenuItem(
+              label: e.label,
+              onSelected: () => runExport(_c, e, stem: exportStem(_c.model), capture: _exportKey),
+            ),
+        ],
+      ),
     ],
   );
 }

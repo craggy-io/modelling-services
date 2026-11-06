@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../chrome/model_chrome.dart';
 import '../theme/model_theme.dart';
 import '../workspace/model_hooks.dart';
+import 'board_insets.dart';
 
 /// Builds the drawing for the part of it in view ([visible], in drawing
 /// coordinates).
@@ -46,6 +47,9 @@ class _ModelCanvasState extends State<ModelCanvas> {
   Size _viewport = Size.zero;
   var _fitted = false;
 
+  /// The view's edges a fit keeps clear (insets and a floating toolbar).
+  EdgeInsets _margin = EdgeInsets.zero;
+
   @override
   void initState() {
     super.initState();
@@ -74,14 +78,17 @@ class _ModelCanvasState extends State<ModelCanvas> {
     super.dispose();
   }
 
-  /// Shows the whole drawing, no larger than actual size, centred.
+  /// Shows the whole drawing, no larger than actual size, centred in the
+  /// part of the view clear of a floating toolbar.
   void fit() {
     final v = _viewport, d = widget.size;
     if (v.isEmpty || d.isEmpty) return;
-    final s = [v.width / d.width, v.height / d.height, 1.0].reduce((a, b) => a < b ? a : b);
+    final area = _margin.deflateRect(Offset.zero & v);
+    if (area.isEmpty) return;
+    final s = [area.width / d.width, area.height / d.height, 1.0].reduce((a, b) => a < b ? a : b);
     final scale = s.clamp(widget.minScale, widget.maxScale).toDouble();
-    final dx = ((v.width - d.width * scale) / 2).clamp(0, double.infinity).toDouble();
-    final dy = ((v.height - d.height * scale) / 2).clamp(0, double.infinity).toDouble();
+    final dx = area.left + ((area.width - d.width * scale) / 2).clamp(0, double.infinity).toDouble();
+    final dy = area.top + ((area.height - d.height * scale) / 2).clamp(0, double.infinity).toDouble();
     _view.value = Matrix4.identity()
       ..translateByDouble(dx, dy, 0, 1)
       ..scaleByDouble(scale, scale, 1, 1);
@@ -102,46 +109,92 @@ class _ModelCanvasState extends State<ModelCanvas> {
   Widget build(BuildContext context) {
     final t = ModelTheme.of(context);
     final chrome = ModelChrome.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            ...widget.leading,
-            const Spacer(),
-            ...widget.trailing,
-            chrome.iconButton(icon: Icons.zoom_out, tooltip: 'Zoom out', onPressed: () => _zoom(1 / 1.25)),
-            chrome.iconButton(icon: Icons.zoom_in, tooltip: 'Zoom in', onPressed: () => _zoom(1.25)),
-            chrome.iconButton(icon: Icons.fit_screen, tooltip: 'Zoom to fit', onPressed: fit),
-          ],
-        ),
-        SizedBox(height: t.spacing.xxs),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, bounds) {
-              _viewport = bounds.biggest;
-              if (!_fitted) {
-                _fitted = true;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) fit();
-                });
-              }
-              final visible = MatrixUtils.inverseTransformRect(_view.value, Offset.zero & _viewport);
-              return RepaintBoundary(
-                key: ModelHooks.of(context).captureKey,
-                child: InteractiveViewer(
-                  transformationController: _view,
-                  constrained: false,
-                  boundaryMargin: EdgeInsets.all(_viewport.shortestSide),
-                  minScale: widget.minScale,
-                  maxScale: widget.maxScale,
-                  child: SizedBox.fromSize(size: widget.size, child: widget.builder(context, visible)),
-                ),
-              );
-            },
+    final inset = BoardInsets.maybeOf(context);
+    final zoom = [
+      ...widget.trailing,
+      chrome.iconButton(icon: Icons.zoom_out, tooltip: 'Zoom out', onPressed: () => _zoom(1 / 1.25)),
+      chrome.iconButton(icon: Icons.zoom_in, tooltip: 'Zoom in', onPressed: () => _zoom(1.25)),
+      chrome.iconButton(icon: Icons.fit_screen, tooltip: 'Zoom to fit', onPressed: fit),
+    ];
+    // On a full-bleed board the drawing fills it and the toolbars float
+    // over its corners; elsewhere they sit in a row above it.
+    _margin = inset == null ? EdgeInsets.zero : inset.copyWith(top: inset.top + _toolbarHeight + t.spacing.xs);
+    final view = LayoutBuilder(
+      builder: (context, bounds) {
+        _viewport = bounds.biggest;
+        if (!_fitted) {
+          _fitted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) fit();
+          });
+        }
+        final visible = MatrixUtils.inverseTransformRect(_view.value, Offset.zero & _viewport);
+        return RepaintBoundary(
+          key: ModelHooks.of(context).captureKey,
+          child: InteractiveViewer(
+            transformationController: _view,
+            constrained: false,
+            boundaryMargin: EdgeInsets.all(_viewport.shortestSide),
+            minScale: widget.minScale,
+            maxScale: widget.maxScale,
+            child: SizedBox.fromSize(size: widget.size, child: widget.builder(context, visible)),
           ),
+        );
+      },
+    );
+    if (inset == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(children: [...widget.leading, const Spacer(), ...zoom]),
+          SizedBox(height: t.spacing.xxs),
+          Expanded(child: view),
+        ],
+      );
+    }
+    return Stack(
+      children: [
+        Positioned.fill(child: view),
+        if (widget.leading.isNotEmpty)
+          Positioned(
+            left: inset.left,
+            top: inset.top,
+            child: _FloatingBar(children: widget.leading),
+          ),
+        Positioned(
+          right: inset.right,
+          top: inset.top,
+          child: _FloatingBar(key: const ValueKey('canvas-toolbar'), children: zoom),
         ),
       ],
+    );
+  }
+}
+
+/// The height of a floating canvas toolbar (a medium icon button and its
+/// frame).
+const _toolbarHeight = 34.0;
+
+/// A toolbar floating over a canvas: the panel surface with a hairline
+/// and a soft shadow.
+class _FloatingBar extends StatelessWidget {
+  const _FloatingBar({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = ModelTheme.of(context);
+    return Container(
+      height: _toolbarHeight,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: t.panel,
+        borderRadius: BorderRadius.circular(t.radius),
+        border: Border.all(color: t.divider, width: t.borderWidth),
+        boxShadow: [BoxShadow(color: t.shadow, blurRadius: 8, offset: const Offset(0, 2))],
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }

@@ -69,12 +69,6 @@ class _CommitFieldState extends State<CommitField> {
   );
 }
 
-/// Tags as a comma-separated list.
-List<String> parseTags(String text) => {
-  for (final t in text.split(','))
-    if (t.trim().isNotEmpty) t.trim(),
-}.toList();
-
 /// Shows a property value as text.
 String propertyText(Object? v) => switch (v) {
   null => '',

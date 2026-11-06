@@ -24,11 +24,27 @@ extension ModelEditing on ModelController {
     return '$base$n';
   }
 
-  /// Adds an area inside [parent] ('' is the top level), unfolds the
-  /// parent, selects the new area and returns its id (null if refused).
-  String? addChild(String parent, {String label = 'New area'}) {
-    final id = newNodeId();
-    if (!tryApply([Op.nodeAdd(Node(id: id, label: label, parent: parent))])) return null;
+  /// The workspace's "Add area": a new area inside the selected area, or
+  /// in the drilled-in region (the top level when none), then a request to
+  /// rename it in place. Returns its id (null if refused).
+  String? addArea() {
+    final sel = selection;
+    final parent = sel != null && sel.isNode && index.node(sel.id) != null ? sel.id : region ?? '';
+    final id = addChild(parent);
+    if (id != null) renameRequest.value = id;
+    return id;
+  }
+
+  /// Adds an area (of [kind], when given) inside [parent] ('' is the top
+  /// level) at `nodes` position [index] (else last), unfolds the parent,
+  /// selects the new area and returns its id (null if refused).
+  String? addChild(String parent, {String label = 'New area', String kind = '', int? index}) {
+    final id = newNodeId(kind.isEmpty ? 'area' : kind);
+    final add = Op.nodeAdd(
+      Node(id: id, label: label, parent: parent, kind: kind),
+      index: index,
+    );
+    if (!tryApply([add])) return null;
     if (parent != '') reveal(parent);
     select(ModelElementRef.node(id));
     focus(id);
@@ -39,16 +55,7 @@ extension ModelEditing on ModelController {
   String? addSibling(String sibling, {String label = 'New area'}) {
     final at = index.nodeIndex(sibling);
     if (at < 0) return null;
-    final id = newNodeId();
-    final parent = index.parent(sibling);
-    final add = Op.nodeAdd(
-      Node(id: id, label: label, parent: parent),
-      index: at + 1,
-    );
-    if (!tryApply([add])) return null;
-    select(ModelElementRef.node(id));
-    focus(id);
-    return id;
+    return addChild(index.parent(sibling), label: label, index: at + 1);
   }
 
   /// Renames an area or relationship; a blank label is refused.
@@ -88,13 +95,43 @@ extension ModelEditing on ModelController {
     if (index.ancestors(parent).contains(id)) {
       return '${target.label} is inside ${node.label}, so ${node.label} cannot move into it.';
     }
-    final p = profile;
-    final allowed = p?.nodeKinds[target.kind]?.children ?? const [];
-    if (allowed.isNotEmpty && node.kind.isNotEmpty && !allowed.contains(node.kind)) {
-      final pk = p!.nodeKinds[target.kind]!.label, nk = p.nodeKinds[node.kind]?.label ?? node.kind;
-      return '${_article(pk, capital: true)} $pk cannot contain ${_article(nk)} $nk.';
+    return childRefusal(parent, node.kind);
+  }
+
+  /// Why an area of [kind] cannot sit inside [parent] under the profile's
+  /// `children` rule, or null when it can ('' is the top level).
+  String? childRefusal(String parent, String kind) {
+    final p = profile, target = index.node(parent);
+    if (p == null || target == null || kind.isEmpty) return null;
+    final allowed = p.nodeKinds[target.kind]?.children ?? const [];
+    if (allowed.isEmpty || allowed.contains(kind)) return null;
+    final pk = p.nodeKinds[target.kind]!.label, nk = p.nodeKinds[kind]?.label ?? kind;
+    return '${indefiniteArticle(pk, capital: true)} $pk cannot contain ${indefiniteArticle(nk)} $nk.';
+  }
+
+  /// Adds an area of [kind] inside [parent], refusing (with [notice]) when
+  /// [childRefusal] gives a reason; then asks the renderer to rename it.
+  String? addKind(String parent, String kind, {required String label, int? index}) {
+    final why = childRefusal(parent, kind);
+    if (why != null) {
+      notice.value = why;
+      return null;
     }
-    return null;
+    final id = addChild(parent, label: label, kind: kind, index: index);
+    if (id != null) renameRequest.value = id;
+    return id;
+  }
+
+  /// [addKind] right before [other] (after it when [after]), in [other]'s
+  /// parent: a palette drop beside an area.
+  String? addKindBeside(String other, String kind, {required String label, bool after = false}) {
+    if (index.node(other) == null) return null;
+    return addKind(
+      index.parent(other),
+      kind,
+      label: label,
+      index: positionBy('', other, after: after),
+    );
   }
 
   /// Moves [id] into [parent], refusing (with [notice]) when
@@ -119,6 +156,15 @@ extension ModelEditing on ModelController {
         if (n.id != id) n.id,
     ];
     return rest.indexOf(other) + (after ? 1 : 0);
+  }
+
+  /// Moves [id] right before [other] (after it when [after]), into
+  /// [other]'s parent: drag-to-reorder. False when nothing would change.
+  bool moveBeside(String id, String other, {bool after = false}) {
+    if (id == other || index.node(other) == null) return false;
+    final at = positionBy(id, other, after: after);
+    if (index.parent(id) == index.parent(other) && index.nodeIndex(id) == at) return false;
+    return reparent(id, index.parent(other), index: at);
   }
 
   List<String> _siblings(String id) => index.children(index.parent(id));
@@ -176,8 +222,12 @@ extension ModelEditing on ModelController {
   }
 
   /// Sets node or edge fields (`label`, `kind`, `notes`, `tags`, `link`, …).
-  bool setFields(ModelElementRef ref, Map<String, Object?> fields) =>
-      tryApply([ref.isNode ? Op.nodeSet(ref.id, fields) : Op.edgeSet(ref.id, fields)]);
+  bool setFields(ModelElementRef ref, Map<String, Object?> fields, {bool merge = true}) =>
+      tryApply([ref.isNode ? Op.nodeSet(ref.id, fields) : Op.edgeSet(ref.id, fields)], merge: merge);
+
+  /// Replaces an element's tags; each change (a tag added or removed) is
+  /// its own undo step.
+  bool setTags(ModelElementRef ref, List<String> tags) => setFields(ref, {'tags': tags}, merge: false);
 
   /// Sets a property (null unsets it).
   bool setProperty(ModelElementRef ref, String key, Object? value) => tryApply([
@@ -203,7 +253,8 @@ extension ModelEditing on ModelController {
       tryApply([Op.evidenceRemove(ref.kind.target, ref.id, evidenceId)]);
 }
 
-String _article(String word, {bool capital = false}) {
+/// "a" or "an" before [word] ("A"/"An" when [capital]).
+String indefiniteArticle(String word, {bool capital = false}) {
   final an = word.isNotEmpty && 'aeiouAEIOU'.contains(word[0]);
   return capital ? (an ? 'An' : 'A') : (an ? 'an' : 'a');
 }

@@ -1,0 +1,1898 @@
+{
+  "add a child area at a position": {
+    "inverse": [
+      {
+        "op": "node.remove",
+        "id": "store"
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "store",
+          "label": "Storage",
+          "parent": "app"
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "add and connect": {
+    "inverse": [
+      {
+        "op": "edge.remove",
+        "id": "e5"
+      },
+      {
+        "op": "node.remove",
+        "id": "db"
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        },
+        {
+          "from": "server",
+          "id": "e5",
+          "label": "stores in",
+          "to": "db"
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        },
+        {
+          "id": "db",
+          "label": "Database"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "cascade removes descendants and edges": {
+    "inverse": [
+      {
+        "op": "node.add",
+        "node": {
+          "id": "net",
+          "label": "Network layer",
+          "parent": "app",
+          "kind": "component",
+          "notes": "OkHttp with pinning.",
+          "tags": [
+            "attack-surface"
+          ],
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "evidence": [
+            {
+              "id": "ev1",
+              "caption": "Pinner config",
+              "ref": {
+                "scheme": "artifact",
+                "id": "a1",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ]
+        },
+        "index": 2
+      },
+      {
+        "op": "node.add",
+        "node": {
+          "id": "pinner",
+          "label": "Certificate pinner",
+          "parent": "net",
+          "kind": "class"
+        },
+        "index": 3
+      },
+      {
+        "op": "edge.add",
+        "edge": {
+          "id": "e1",
+          "from": "ui",
+          "to": "net",
+          "label": "calls",
+          "kind": "calls"
+        },
+        "index": 0
+      },
+      {
+        "op": "edge.add",
+        "edge": {
+          "id": "e2",
+          "from": "net",
+          "to": "server",
+          "label": "talks to",
+          "kind": "calls",
+          "evidence": [
+            {
+              "id": "ev1",
+              "caption": "Traffic capture",
+              "ref": {
+                "scheme": "artifact",
+                "id": "a2"
+              }
+            }
+          ]
+        },
+        "index": 1
+      },
+      {
+        "op": "edge.add",
+        "edge": {
+          "id": "e3",
+          "from": "pinner",
+          "to": "native",
+          "label": "loads"
+        },
+        "index": 2
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "clear a link and a kind": {
+    "inverse": [
+      {
+        "op": "node.set",
+        "id": "native",
+        "fields": {
+          "kind": "component",
+          "link": {
+            "model": "m-native"
+          }
+        }
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "label": "Native libraries"
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "duplicate id": {
+    "error": {
+      "code": "op.exists",
+      "index": 0
+    }
+  },
+  "edge to a missing node fails validation": {
+    "error": {
+      "code": "edge.endpoint",
+      "index": -1
+    }
+  },
+  "evidence add, dedupe and remove": {
+    "inverse": [
+      {
+        "op": "evidence.add",
+        "id": "e2",
+        "target": "edge",
+        "evidence": {
+          "id": "ev1",
+          "caption": "Traffic capture",
+          "ref": {
+            "scheme": "artifact",
+            "id": "a2"
+          }
+        },
+        "index": 0
+      },
+      {
+        "op": "evidence.remove",
+        "id": "net",
+        "target": "node",
+        "evidenceId": "ev2"
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            },
+            {
+              "caption": "Decompiled",
+              "id": "ev2",
+              "ref": {
+                "id": "a9",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "index out of range": {
+    "error": {
+      "code": "op.index",
+      "index": 0
+    }
+  },
+  "missing target": {
+    "error": {
+      "code": "op.missing",
+      "index": 1
+    }
+  },
+  "model fields": {
+    "inverse": [
+      {
+        "op": "model.set",
+        "fields": {
+          "profile": "craggy.profile/android-app@1",
+          "tags": null,
+          "title": "Payment app"
+        }
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "subject": "com.example.pay 4.2.1",
+      "tags": [
+        "x"
+      ],
+      "title": "Pay",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "move into own descendant is refused by validation": {
+    "error": {
+      "code": "parent.cycle",
+      "index": -1
+    }
+  },
+  "move keeps position": {
+    "inverse": [
+      {
+        "op": "node.move",
+        "id": "pinner",
+        "parent": "net",
+        "index": 3
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "app"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "move to top level at a position": {
+    "inverse": [
+      {
+        "op": "node.move",
+        "id": "ui",
+        "parent": "app",
+        "index": 1
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "properties": {
+    "inverse": [
+      {
+        "op": "prop.set",
+        "id": "ui",
+        "target": "node",
+        "key": "language",
+        "value": "kotlin"
+      },
+      {
+        "op": "prop.unset",
+        "id": "e1",
+        "target": "edge",
+        "key": "weight"
+      },
+      {
+        "op": "prop.set",
+        "id": "net",
+        "target": "node",
+        "key": "language",
+        "value": "kotlin"
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "properties": {
+            "weight": 3
+          },
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "java"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "refuse a non-scalar property": {
+    "error": {
+      "code": "op.field",
+      "index": 0
+    }
+  },
+  "refuse an unknown field": {
+    "error": {
+      "code": "op.field",
+      "index": 0
+    }
+  },
+  "refuse removing a non-empty area": {
+    "error": {
+      "code": "op.not-empty",
+      "index": 0
+    }
+  },
+  "remove a leaf": {
+    "inverse": [
+      {
+        "op": "node.add",
+        "node": {
+          "id": "server",
+          "label": "Payment server"
+        },
+        "index": 5
+      },
+      {
+        "op": "edge.add",
+        "edge": {
+          "id": "e2",
+          "from": "net",
+          "to": "server",
+          "label": "talks to",
+          "kind": "calls",
+          "evidence": [
+            {
+              "id": "ev1",
+              "caption": "Traffic capture",
+              "ref": {
+                "scheme": "artifact",
+                "id": "a2"
+              }
+            }
+          ]
+        },
+        "index": 1
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "remove an edge": {
+    "inverse": [
+      {
+        "op": "edge.add",
+        "edge": {
+          "id": "e2",
+          "from": "net",
+          "to": "server",
+          "label": "talks to",
+          "kind": "calls",
+          "evidence": [
+            {
+              "id": "ev1",
+              "caption": "Traffic capture",
+              "ref": {
+                "scheme": "artifact",
+                "id": "a2"
+              }
+            }
+          ]
+        },
+        "index": 1
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "set edge ends": {
+    "inverse": [
+      {
+        "op": "edge.set",
+        "id": "e3",
+        "fields": {
+          "from": "pinner",
+          "undirected": false
+        }
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "net",
+          "id": "e3",
+          "label": "loads",
+          "to": "native",
+          "undirected": true
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "set node fields": {
+    "inverse": [
+      {
+        "op": "node.set",
+        "id": "net",
+        "fields": {
+          "label": "Network layer",
+          "link": null,
+          "notes": "OkHttp with pinning.",
+          "tags": [
+            "attack-surface"
+          ]
+        }
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Networking",
+          "link": {
+            "model": "m-net",
+            "node": "root"
+          },
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "a",
+            "b"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "collapsed": [
+            "net"
+          ],
+          "id": "overview",
+          "renderer": "blocks",
+          "title": "Overview"
+        }
+      ]
+    }
+  },
+  "unknown op": {
+    "error": {
+      "code": "op.unknown",
+      "index": 0
+    }
+  },
+  "views put and remove": {
+    "inverse": [
+      {
+        "op": "view.put",
+        "view": {
+          "id": "overview",
+          "title": "Overview",
+          "renderer": "graph",
+          "positions": {
+            "app": [
+              10,
+              20
+            ]
+          }
+        },
+        "index": 1
+      },
+      {
+        "op": "view.remove",
+        "id": "list"
+      },
+      {
+        "op": "view.put",
+        "view": {
+          "id": "overview",
+          "title": "Overview",
+          "renderer": "blocks",
+          "collapsed": [
+            "net"
+          ]
+        }
+      }
+    ],
+    "result": {
+      "edges": [
+        {
+          "from": "ui",
+          "id": "e1",
+          "kind": "calls",
+          "label": "calls",
+          "to": "net"
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Traffic capture",
+              "id": "ev1",
+              "ref": {
+                "id": "a2",
+                "scheme": "artifact"
+              }
+            }
+          ],
+          "from": "net",
+          "id": "e2",
+          "kind": "calls",
+          "label": "talks to",
+          "to": "server"
+        },
+        {
+          "from": "pinner",
+          "id": "e3",
+          "label": "loads",
+          "to": "native"
+        },
+        {
+          "from": "ui",
+          "id": "e4",
+          "label": "shares data with",
+          "to": "native",
+          "undirected": true
+        }
+      ],
+      "format": "craggy.model",
+      "nodes": [
+        {
+          "id": "app",
+          "kind": "app",
+          "label": "Application"
+        },
+        {
+          "id": "ui",
+          "kind": "component",
+          "label": "UI layer",
+          "parent": "app",
+          "properties": {
+            "language": "kotlin"
+          }
+        },
+        {
+          "evidence": [
+            {
+              "caption": "Pinner config",
+              "id": "ev1",
+              "ref": {
+                "id": "a1",
+                "scheme": "artifact",
+                "selector": "/res/xml/nsc.xml"
+              }
+            }
+          ],
+          "id": "net",
+          "kind": "component",
+          "label": "Network layer",
+          "notes": "OkHttp with pinning.",
+          "parent": "app",
+          "properties": {
+            "exported": false,
+            "language": "kotlin"
+          },
+          "tags": [
+            "attack-surface"
+          ]
+        },
+        {
+          "id": "pinner",
+          "kind": "class",
+          "label": "Certificate pinner",
+          "parent": "net"
+        },
+        {
+          "id": "native",
+          "kind": "component",
+          "label": "Native libraries",
+          "link": {
+            "model": "m-native"
+          }
+        },
+        {
+          "id": "server",
+          "label": "Payment server"
+        }
+      ],
+      "profile": "craggy.profile/android-app@1",
+      "subject": "com.example.pay 4.2.1",
+      "title": "Payment app",
+      "version": 2,
+      "views": [
+        {
+          "id": "list",
+          "renderer": "outline",
+          "title": "List"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "about": "Decoding a version 1 graph (the craggy-labs intel graph) upgrades it: expected is the upgraded document.",
+  "cases": [
+    {"name": "intel graph with evidence",
+      "v1": {"version": 1, "title": "Board", "subject": "app.apk", "notes": "seeded",
+        "nodes": [{"id": "a", "label": "A", "notes": "n", "evidence": [
+            {"citation": {"artifactId": "x1", "selector": "lib/arm64"}, "caption": "lib"},
+            {"citation": {"artifactId": "x2"}, "caption": "crash"}]},
+          {"id": "b", "label": "B", "parent": "a"}],
+        "edges": [{"id": "a--b", "from": "a", "to": "b", "label": "uses", "evidence": [{"citation": {"artifactId": "x1"}, "caption": "c"}]}]},
+      "expected": {"format": "craggy.model", "version": 2, "title": "Board", "subject": "app.apk", "notes": "seeded",
+        "nodes": [{"id": "a", "label": "A", "notes": "n", "evidence": [
+            {"id": "ev1", "caption": "lib", "ref": {"scheme": "artifact", "id": "x1", "selector": "lib/arm64"}},
+            {"id": "ev2", "caption": "crash", "ref": {"scheme": "artifact", "id": "x2"}}]},
+          {"id": "b", "label": "B", "parent": "a"}],
+        "edges": [{"id": "a--b", "from": "a", "to": "b", "label": "uses", "evidence": [{"id": "ev1", "caption": "c", "ref": {"scheme": "artifact", "id": "x1"}}]}]}},
+    {"name": "empty graph", "v1": {"version": 1, "title": "T", "subject": "S", "nodes": [], "edges": []},
+      "expected": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S", "nodes": [], "edges": []}}
+  ]
+}

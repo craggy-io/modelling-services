@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://craggy.io/schemas/model.v1.schema.json",
+  "title": "Craggy labs intel graph, version 1 (read only)",
+  "description": "The graph craggy-labs stored before modelling-services. Decoders upgrade it to version 2; nothing writes it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "title", "subject", "nodes", "edges"],
+  "properties": {
+    "version": {"const": 1},
+    "title": {"type": "string"},
+    "subject": {"type": "string"},
+    "notes": {"type": "string"},
+    "nodes": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false, "required": ["id", "label"],
+      "properties": {
+        "id": {"type": "string"}, "label": {"type": "string"}, "parent": {"type": "string"}, "notes": {"type": "string"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }}},
+    "edges": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false, "required": ["id", "from", "to", "label"],
+      "properties": {
+        "id": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}, "label": {"type": "string"}, "notes": {"type": "string"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }}}
+  },
+  "$defs": {
+    "evidence": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false, "required": ["citation", "caption"],
+      "properties": {
+        "caption": {"type": "string"},
+        "citation": {"type": "object", "additionalProperties": false, "required": ["artifactId"],
+          "properties": {"artifactId": {"type": "string"}, "selector": {"type": "string"}}}
+      }}}
+  }
+}

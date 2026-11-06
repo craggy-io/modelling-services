@@ -1,0 +1,18 @@
+{
+  "about": "lint(model, profile?) must give findings, each {rule, element, severity}; messages are not compared.",
+  "cases": [
+    {"name": "app without a profile", "model": "@app"},
+    {"name": "app against its profile", "model": "@app", "profile": "@android-profile"},
+    {"name": "structural warnings", "model": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S",
+      "nodes": [{"id": "a", "label": "Area"}, {"id": "b", "label": "Same", "parent": "a"}, {"id": "c", "label": " same ", "parent": "a"}],
+      "edges": [{"id": "e1", "from": "b", "to": "c", "label": "uses"}, {"id": "e2", "from": "b", "to": "c", "label": "Uses"}, {"id": "e3", "from": "a", "to": "b", "label": "contains"}],
+      "views": [{"id": "v", "title": "V", "renderer": "blocks", "root": "gone", "collapsed": ["a", "old"], "positions": {"zz": [0, 0]}}]}},
+    {"name": "profile violations", "profile": "@android-profile", "model": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S",
+      "nodes": [{"id": "app", "label": "App", "kind": "app"},
+                {"id": "cls", "label": "Cls", "kind": "class", "parent": "app"},
+                {"id": "c", "label": "C", "kind": "component", "parent": "app", "properties": {"language": "rust", "exported": "yes", "extra": 1}},
+                {"id": "x", "label": "X", "kind": "widget"},
+                {"id": "none", "label": "None"}],
+      "edges": [{"id": "e1", "from": "app", "to": "c", "label": "calls", "kind": "calls"}, {"id": "e2", "from": "c", "to": "cls", "label": "y"}]}}
+  ]
+}

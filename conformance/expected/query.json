@@ -1,0 +1,56 @@
+{
+  "ancestors": [
+    "net",
+    "app"
+  ],
+  "descendants": [
+    "ui",
+    "net",
+    "pinner"
+  ],
+  "impact of a leaf": [],
+  "impact of an area includes its children's edges": [
+    "ui",
+    "native",
+    "server"
+  ],
+  "neighbours both depth 2": [
+    "ui",
+    "server",
+    "native"
+  ],
+  "neighbours in": [
+    "pinner",
+    "ui"
+  ],
+  "neighbours out": [
+    "net",
+    "native"
+  ],
+  "paths": [
+    [
+      "e1",
+      "e2"
+    ]
+  ],
+  "paths through undirected": [
+    [
+      "e4",
+      "e1",
+      "e2"
+    ]
+  ],
+  "paths too short": [],
+  "search kind and tag": [
+    "net"
+  ],
+  "search nothing matches": [],
+  "search property value": [
+    "ui",
+    "net"
+  ],
+  "search text": [
+    "net",
+    "pinner"
+  ]
+}

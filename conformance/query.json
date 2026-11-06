@@ -1,0 +1,19 @@
+{
+  "about": "Each case runs one query on model and must return result. fn is search (args: filter), neighbours (id, direction, depth), paths (from, to, maxLen, maxPaths; result: edge-id lists), impact (id), descendants (id) or ancestors (id).",
+  "cases": [
+    {"name": "search text", "model": "@app", "fn": "search", "args": {"filter": {"text": "PIN"}}},
+    {"name": "search property value", "model": "@app", "fn": "search", "args": {"filter": {"text": "kotlin"}}},
+    {"name": "search kind and tag", "model": "@app", "fn": "search", "args": {"filter": {"kinds": ["component"], "tags": ["attack-surface"]}}},
+    {"name": "search nothing matches", "model": "@app", "fn": "search", "args": {"filter": {"text": "zzz"}}},
+    {"name": "neighbours out", "model": "@app", "fn": "neighbours", "args": {"id": "ui", "direction": "out", "depth": 1}},
+    {"name": "neighbours in", "model": "@app", "fn": "neighbours", "args": {"id": "native", "direction": "in", "depth": 1}},
+    {"name": "neighbours both depth 2", "model": "@app", "fn": "neighbours", "args": {"id": "net", "direction": "both", "depth": 2}},
+    {"name": "paths", "model": "@app", "fn": "paths", "args": {"from": "ui", "to": "server", "maxLen": 4, "maxPaths": 10}},
+    {"name": "paths through undirected", "model": "@app", "fn": "paths", "args": {"from": "native", "to": "server", "maxLen": 4, "maxPaths": 10}},
+    {"name": "paths too short", "model": "@app", "fn": "paths", "args": {"from": "ui", "to": "server", "maxLen": 1, "maxPaths": 10}},
+    {"name": "impact of an area includes its children's edges", "model": "@app", "fn": "impact", "args": {"id": "net"}},
+    {"name": "impact of a leaf", "model": "@app", "fn": "impact", "args": {"id": "server"}},
+    {"name": "descendants", "model": "@app", "fn": "descendants", "args": {"id": "app"}},
+    {"name": "ancestors", "model": "@app", "fn": "ancestors", "args": {"id": "pinner"}}
+  ]
+}

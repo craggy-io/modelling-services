@@ -10,6 +10,44 @@ typed properties, cited evidence and saved views, in one versioned JSON format. 
 implement the same format and engines, proven equal by shared conformance vectors, and a Flutter
 package renders and edits models on desktop and the web.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/editor-dark.png">
+  <img src="docs/assets/screenshots/editor-light.png" alt="The modeller editing a payment app model: component palette and layers on the left, nested areas on a grid board in the middle, the model overview and checks on the right">
+</picture>
+
+## The modeller
+
+`apps/modeller` is a standalone editor for Windows and the web, built on the `ModelEditor` widget
+that any Flutter host can embed.
+
+- **Palette and layers.** Drag a component onto the board or onto an area to add it inside. The
+  Layers tree mirrors containment and reparents by drag.
+- **A fixed grid, not a free canvas.** Areas sit on a 10-column grid inside their parent. Resize
+  from an edge or corner in 10% steps of the parent's width and in fixed rows. Sizes are saved in
+  the view, not in the model.
+- **Drag to rearrange.** Drag a card from anywhere on it. A placeholder shows where it will land
+  and the other cards make room. Drop on an edge to place it beside a card, or on the middle to
+  put it inside.
+- **Inspector and checks.** The docked inspector edits label, kind, notes, tags, typed properties,
+  relationships and evidence. Lint findings from the profile show on the cards and in the status
+  bar. Every edit is undoable.
+
+![Dragging the UI layer card beside the Native libraries card: a highlighted placeholder shows where it will land and Native libraries has moved to the next row](docs/assets/screenshots/drag-dark.png)
+
+The same model and selection carry across five views:
+
+| Outline | Graph |
+| --- | --- |
+| ![Outline view: an indented tree of areas with their relationships](docs/assets/screenshots/outline-dark.png) | ![Graph view: containment boxes with labelled relationship arrows](docs/assets/screenshots/graph-dark.png) |
+| **Matrix** | **Table** |
+| ![Matrix view: a dependency structure matrix counting relationships between areas](docs/assets/screenshots/matrix-dark.png) | ![Table view: editable rows of areas with kind, parent, tags and properties](docs/assets/screenshots/table-dark.png) |
+
+Run it locally:
+
+```bash
+cd apps/modeller && flutter run -d chrome     # or -d windows
+```
+
 ## Features
 
 - **One format** ([format](docs/format.md)): `craggy.model` version 2, with a [JSON Schema](schema/model.v2.schema.json), canonical encoding, strict decoding, bounds, and an upgrade from the version 1 graphs craggy-labs stored.

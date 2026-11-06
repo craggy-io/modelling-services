@@ -29,7 +29,7 @@ Other clients take the same two shapes in their JSON config:
 { "mcpServers": { "craggy-models": { "command": "modelling-mcp" } } }
 ```
 
-The modeller's **Connect agent** button shows these setup lines with copy buttons. Agents that
+The modeller's **Agent MCP** button shows these setup lines with copy buttons. Agents that
 read https://models.craggy.io as text find the same in the page and in
 [`/llms.txt`](https://models.craggy.io/llms.txt).
 

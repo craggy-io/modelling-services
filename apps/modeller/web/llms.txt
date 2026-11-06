@@ -1,0 +1,43 @@
+# Craggy Modeller
+
+> A visual editor for block models: labelled areas nested by containment, labelled relationships between them, typed properties and cited evidence, stored as one JSON format ("craggy.model", version 2). Agents use it through an MCP server; people view and edit the result in the browser.
+
+## Use it from an agent
+
+The MCP server is at https://models.craggy.io/mcp (streamable HTTP, stateless, no accounts). Nothing is stored: the agent keeps the model document and passes it to each tool.
+
+- Claude Code: `claude mcp add --transport http craggy-models https://models.craggy.io/mcp`
+- Any MCP client: `{"mcpServers": {"craggy-models": {"type": "http", "url": "https://models.craggy.io/mcp"}}}`
+- Local over stdio: `go install github.com/craggy-io/modelling-services/cmd/modelling-mcp@latest`, then run `modelling-mcp`
+
+Tools: model_import (outline, Mermaid or CSV to a document), model_check (validate and lint), model_apply (small invertible edits), model_diff, model_query (neighbours, paths, impact, search), model_export (outline, Mermaid, DOT, SVG, CSV) and model_open (a link that opens the model here).
+
+A quick start: write a Markdown outline, import it, refine with model_apply, then give the user the model_open link.
+
+```markdown
+# Payment app
+
+com.example.pay
+
+- **Application** `app`
+  - **UI layer** `ui`
+  - **Network layer** `net`
+- **Payment API** `api`
+
+## Relationships
+
+- `ui` -> `net`: calls `ui--net`
+- `net` -> `api`: posts payments to `net--api`
+```
+
+## Open a model without the MCP server
+
+https://models.craggy.io/#m=DATA opens a model, where DATA is the canonical JSON document, compressed with raw DEFLATE (no zlib header) and base64url-encoded without padding. The fragment never reaches the server.
+
+## Reference
+
+- [MCP server](https://github.com/craggy-io/modelling-services/blob/main/docs/mcp.md): tools, clients, hosting
+- [Format](https://github.com/craggy-io/modelling-services/blob/main/docs/format.md): the document format
+- [JSON Schema](https://models.craggy.io/schema/model.v2.schema.json): format version 2
+- [Edit operations](https://github.com/craggy-io/modelling-services/blob/main/docs/edit.md)
+- [Source](https://github.com/craggy-io/modelling-services)

@@ -22,10 +22,14 @@ class EditStep {
 /// Consecutive node.set or edge.set steps that set the same single field of
 /// the same element (typing) merge into one step, unless the earlier step has
 /// been saved.
+///
+/// [saved] false starts a model that has never been stored (one opened from
+/// a link, say): it is dirty, with no [pendingOps], until [markSaved].
 class EditHistory {
-  EditHistory(Model model, {this.limits = const Limits()})
+  EditHistory(Model model, {this.limits = const Limits(), bool saved = true})
       : _model = model,
-        _saved = const [];
+        _saved = const [],
+        _stored = saved;
 
   /// The limits every apply validates against.
   final Limits limits;
@@ -34,6 +38,7 @@ class EditHistory {
   final _done = <EditStep>[];
   final _undone = <EditStep>[];
   List<EditStep> _saved;
+  bool _stored;
 
   /// The current model.
   Model get model => _model;
@@ -79,10 +84,14 @@ class EditHistory {
   }
 
   /// Marks the current model as saved: [pendingOps] becomes empty.
-  void markSaved() => _saved = List.unmodifiable(_done);
+  void markSaved() {
+    _saved = List.unmodifiable(_done);
+    _stored = true;
+  }
 
-  /// Whether the model differs (by history) from the last save.
-  bool get isDirty => pendingOps.isNotEmpty;
+  /// Whether the model differs (by history) from the last save, or has
+  /// never been saved.
+  bool get isDirty => !_stored || pendingOps.isNotEmpty;
 
   /// The operations that take the saved model to the current one: inverses
   /// of saved steps since undone (latest first), then the steps applied

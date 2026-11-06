@@ -22,7 +22,8 @@ class ModelController extends ChangeNotifier {
     bool readOnly = false,
     this.limits = const Limits(),
     String renderer = 'blocks',
-  }) : _history = EditHistory(model, limits: limits),
+    bool saved = true,
+  }) : _history = EditHistory(model, limits: limits, saved: saved),
        _base = base,
        _profile = profile,
        _readOnly = readOnly,
@@ -158,7 +159,7 @@ class ModelController extends ChangeNotifier {
     _changed();
   }
 
-  /// Whether there are edits since the last [markSaved].
+  /// Whether there are edits since the last [markSaved], or no save yet.
   bool get dirty => _history.isDirty;
 
   /// The operations that turn the last saved model into this one.

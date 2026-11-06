@@ -50,6 +50,14 @@
     {"name": "field names are case-exact", "raw": "{\"format\":\"craggy.model\",\"version\":2,\"TITLE\":\"T\",\"subject\":\"S\",\"nodes\":[],\"edges\":[]}", "decodeError": true},
     {"name": "nested field names are case-exact", "raw": "{\"format\":\"craggy.model\",\"version\":2,\"title\":\"T\",\"subject\":\"S\",\"nodes\":[{\"id\":\"a\",\"Label\":\"A\"}],\"edges\":[]}", "decodeError": true},
     {"name": "free-form maps keep any key", "document": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S", "nodes": [{"id": "a", "label": "A", "properties": {"Label": "x", "TITLE": 1}}], "edges": [], "views": [{"id": "v", "renderer": "graph", "positions": {"a": [1, 2]}, "options": {"Zoom": 2}}]}, "issues": []},
+    {"name": "view sizes", "document": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S", "nodes": [{"id": "a", "label": "A"}, {"id": "b", "label": "B", "parent": "a"}], "edges": [],
+      "views": [{"id": "v", "renderer": "blocks", "sizes": {"b": {"w": 4}, "a": {"w": 10, "h": 3}}}]}, "issues": [],
+      "encoded": "{\"edges\":[],\"format\":\"craggy.model\",\"nodes\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\",\"parent\":\"a\"}],\"subject\":\"S\",\"title\":\"T\",\"version\":2,\"views\":[{\"id\":\"v\",\"renderer\":\"blocks\",\"sizes\":{\"a\":{\"h\":3,\"w\":10},\"b\":{\"w\":4}}}]}"},
+    {"name": "view size bounds", "document": {"format": "craggy.model", "version": 2, "title": "T", "subject": "S", "nodes": [], "edges": [],
+      "views": [{"id": "v", "renderer": "blocks", "sizes": {"a": {"w": 11}, "b": {}, "c": {"w": 3, "h": 21}, "d": {"w": -1}, "-x": {"w": 1}, "ok": {"h": 20}}}]},
+      "issues": ["view.size", "view.size", "view.size", "view.size", "view.size"]},
+    {"name": "size field names are case-exact", "raw": "{\"format\":\"craggy.model\",\"version\":2,\"title\":\"T\",\"subject\":\"S\",\"views\":[{\"id\":\"v\",\"renderer\":\"blocks\",\"sizes\":{\"a\":{\"W\":2}}}]}", "decodeError": true},
+    {"name": "size values are integers", "raw": "{\"format\":\"craggy.model\",\"version\":2,\"title\":\"T\",\"subject\":\"S\",\"views\":[{\"id\":\"v\",\"renderer\":\"blocks\",\"sizes\":{\"a\":{\"w\":2.5}}}]}", "decodeError": true},
     {"name": "unknown v1 field", "raw": "{\"version\":1,\"title\":\"T\",\"subject\":\"S\",\"nodes\":[{\"id\":\"a\",\"label\":\"A\",\"kind\":\"x\"}],\"edges\":[]}", "decodeError": true}
   ]
 }

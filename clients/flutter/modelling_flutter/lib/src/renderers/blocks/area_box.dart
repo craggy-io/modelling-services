@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../chrome/model_chrome.dart';
 import '../../controller/model_controller.dart';
 import '../../controller/model_editing.dart';
+import '../../shared/drag_payloads.dart';
 import '../../shared/markers.dart';
 import '../../shared/model_diff.dart';
 import '../../theme/model_theme.dart';
@@ -30,18 +31,6 @@ abstract class BlocksBoardHandle {
   void cancelRename();
   void delete(String id);
   void connect(String from, String to);
-}
-
-/// Dragged to reparent an area.
-class MoveArea {
-  const MoveArea(this.id);
-  final String id;
-}
-
-/// Dragged from an area's connection handle to draw a relationship.
-class ConnectArea {
-  const ConnectArea(this.from);
-  final String from;
 }
 
 class AreaBox extends StatelessWidget {
@@ -130,15 +119,6 @@ class AreaBox extends StatelessWidget {
               _handle(context, t, MoveArea(id), Icons.drag_indicator, 'Drag to move ${area.title} into another area'),
               AreaMenu(board: board, id: id, title: area.title),
             ],
-            if (editable && id == null)
-              chrome.iconButton(
-                icon: Icons.add_box_outlined,
-                tooltip: 'Add area',
-                onPressed: () {
-                  final added = c.addChild(c.region ?? '');
-                  if (added != null) board.startRename(added);
-                },
-              ),
           ],
         ),
         if (mark?.value != null) ...[
@@ -227,32 +207,14 @@ class AreaBox extends StatelessWidget {
     );
   }
 
-  Widget _handle(BuildContext context, ModelTheme t, Object payload, IconData icon, String tooltip) {
-    final chip = Container(
+  Widget _handle(BuildContext context, ModelTheme t, Object payload, IconData icon, String tooltip) => DragHandle(
+    payload: payload,
+    icon: icon,
+    tooltip: tooltip,
+    feedback: Container(
       padding: EdgeInsets.symmetric(horizontal: t.spacing.sm, vertical: t.spacing.xxs),
       decoration: BoxDecoration(color: t.raised, borderRadius: BorderRadius.circular(t.radius)),
       child: Text(area.title, style: t.standard),
-    );
-    return Draggable<Object>(
-      data: payload,
-      dragAnchorStrategy: pointerDragAnchorStrategy,
-      feedback: ModelThemeScope(
-        theme: t,
-        child: Directionality(textDirection: TextDirection.ltr, child: chip),
-      ),
-      child: MouseRegion(
-        cursor: payload is MoveArea ? SystemMouseCursors.grab : SystemMouseCursors.precise,
-        child: ModelChrome.of(context).tooltip(
-          message: tooltip,
-          child: Semantics(
-            label: tooltip,
-            child: Padding(
-              padding: EdgeInsets.all(t.spacing.xxs + 2),
-              child: Icon(icon, size: 16, color: t.muted),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    ),
+  );
 }

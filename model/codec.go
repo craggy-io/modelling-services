@@ -88,18 +88,27 @@ var fieldNames = map[string]bool{}
 func init() {
 	for _, n := range strings.Fields(`format version title subject notes profile tags nodes edges views
 		id label parent kind properties evidence link from to undirected caption ref scheme selector model node
-		renderer root collapsed filter positions options kinds text changedOnly citation artifactId`) {
+		renderer root collapsed filter positions sizes w h options kinds text changedOnly citation artifactId`) {
 		fieldNames[n] = true
 	}
 }
 
 // exactNames refuses an object key that is not spelled exactly as a field,
-// outside free-form maps (properties, options, positions).
+// outside free-form maps (properties, options, positions). Sizes is keyed
+// by node id, but each size's own names are exact.
 func exactNames(v any, parent string) error {
 	switch x := v.(type) {
 	case map[string]any:
 		if parent == "properties" || parent == "options" || parent == "positions" {
 			return nil // free-form: values are checked by Validate
+		}
+		if parent == "sizes" {
+			for _, size := range x {
+				if err := exactNames(size, "size"); err != nil {
+					return err
+				}
+			}
+			return nil
 		}
 		for k, child := range x {
 			if !fieldNames[k] {

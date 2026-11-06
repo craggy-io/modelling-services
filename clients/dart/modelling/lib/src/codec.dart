@@ -40,7 +40,7 @@ String encodeModel(Model m) => canonicalJson(m.copyWith(format: modelFormat, ver
 const _modelFields = {'format', 'version', 'title', 'subject', 'notes', 'profile', 'tags', 'nodes', 'edges', 'views'};
 const _nodeFields = {'id', 'label', 'parent', 'kind', 'notes', 'tags', 'properties', 'evidence', 'link'};
 const _edgeFields = {'id', 'from', 'to', 'label', 'kind', 'undirected', 'notes', 'tags', 'properties', 'evidence'};
-const _viewFields = {'id', 'title', 'renderer', 'root', 'collapsed', 'filter', 'positions', 'options'};
+const _viewFields = {'id', 'title', 'renderer', 'root', 'collapsed', 'filter', 'positions', 'sizes', 'options'};
 
 Model readModel(Object? json, String path, {required bool strict}) {
   final o = JsonObject(json, path, strict: strict, fields: _modelFields);
@@ -114,8 +114,14 @@ View readView(Object? json, String path, {required bool strict}) {
     collapsed: o.strings('collapsed'),
     filter: o.optional('filter', (v, p) => readFilter(v, p, strict: strict)),
     positions: o.map('positions', _position),
+    sizes: o.map('sizes', (v, p) => readNodeSize(v, p, strict: strict)),
     options: _properties(o, 'options'),
   );
+}
+
+NodeSize readNodeSize(Object? json, String path, {required bool strict}) {
+  final o = JsonObject(json, path, strict: strict, fields: const {'w', 'h'});
+  return NodeSize(w: o.integer('w'), h: o.integer('h'));
 }
 
 Filter readFilter(Object? json, String path, {required bool strict}) {

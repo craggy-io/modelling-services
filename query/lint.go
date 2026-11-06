@@ -86,6 +86,9 @@ func Lint(ix *model.Index, profile *model.Profile) []Finding {
 		for _, id := range model.SortedKeys(v.Positions) {
 			check(id)
 		}
+		for _, id := range model.SortedKeys(v.Sizes) {
+			check(id)
+		}
 		if len(stale) > 0 {
 			add("view.stale", v.ID, Info, "view %q names nodes that no longer exist: %s", v.ID, strings.Join(stale, ", "))
 		}

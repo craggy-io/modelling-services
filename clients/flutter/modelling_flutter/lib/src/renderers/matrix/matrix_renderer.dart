@@ -9,6 +9,7 @@ import '../../chrome/model_chrome.dart';
 import '../../controller/model_controller.dart';
 import '../../controller/model_types.dart';
 import '../../inspector/inspector.dart';
+import '../../shared/board_insets.dart';
 import '../../shared/markers.dart';
 import '../../shared/model_canvas.dart';
 import '../../shared/relationship_row.dart';
@@ -17,6 +18,7 @@ import '../../theme/model_theme.dart';
 import '../model_renderer.dart';
 import 'matrix_layout.dart';
 import 'matrix_painter.dart';
+import '../../shared/no_areas.dart';
 
 /// The matrix (DSM) renderer.
 class MatrixRenderer extends ModelRenderer {
@@ -63,13 +65,14 @@ class _MatrixViewState extends State<MatrixView> {
     final chrome = ModelChrome.of(context);
     final c = _c;
     final layout = layoutMatrix(c);
-    if (layout.nodes.isEmpty) return Center(child: Text('No matching areas.', style: t.small));
+    if (layout.nodes.isEmpty) return NoAreas(controller: c);
     final rowOf = {for (var i = 0; i < layout.nodes.length; i++) layout.nodes[i].id: i};
     final p = _picked;
     final picked = p == null || rowOf[p.$1] == null || rowOf[p.$2] == null
         ? null
         : (row: rowOf[p.$1]!, column: rowOf[p.$2]!);
     final listed = picked == null ? const <String>[] : layout.cells[picked] ?? const <String>[];
+    final inset = BoardInsets.maybeOf(context);
 
     final canvas = ModelCanvas(
       size: layout.size,
@@ -115,9 +118,12 @@ class _MatrixViewState extends State<MatrixView> {
         Expanded(child: canvas),
         if (picked != null) ...[
           SizedBox(height: t.spacing.xs),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 220),
-            child: _list(context, layout, picked, listed),
+          Padding(
+            padding: inset == null ? EdgeInsets.zero : inset.copyWith(top: 0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 220),
+              child: _list(context, layout, picked, listed),
+            ),
           ),
         ],
       ],

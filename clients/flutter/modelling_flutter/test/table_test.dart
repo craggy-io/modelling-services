@@ -72,10 +72,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(c.model.nodeById('ui')!.label, 'Screens');
 
-    await tester.enterText(find.descendant(of: editor('net', 'tags'), matching: find.byType(EditableText)), 'a, b');
+    // Tags edit as chips here too: Enter adds one, × removes one.
+    await tester.enterText(find.descendant(of: editor('net', 'tags'), matching: find.byType(EditableText)), 'a');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(c.model.nodeById('net')!.tags, ['a', 'b']);
+    expect(c.model.nodeById('net')!.tags, ['attack-surface', 'a']);
+    await tester.tap(find.descendant(of: editor('net', 'tags'), matching: find.byTooltip('Remove attack-surface')));
+    await tester.pumpAndSettle();
+    expect(c.model.nodeById('net')!.tags, ['a']);
 
+    await tester.tap(find.byTooltip('Undo'));
+    await tester.pumpAndSettle();
+    expect(c.model.nodeById('net')!.tags, ['attack-surface', 'a']);
     await tester.tap(find.byTooltip('Undo'));
     await tester.pumpAndSettle();
     expect(c.model.nodeById('net')!.tags, ['attack-surface']);

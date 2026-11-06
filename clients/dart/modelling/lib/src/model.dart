@@ -359,9 +359,11 @@ class View extends JsonValue {
     List<String> collapsed = const [],
     this.filter,
     Map<String, Position> positions = const {},
+    Map<String, NodeSize> sizes = const {},
     Properties options = const {},
   })  : collapsed = _list(collapsed),
         positions = _map(positions),
+        sizes = _map(sizes),
         options = _map(options);
 
   factory View.fromJson(Object? json, {bool strict = false}) => readView(json, 'view', strict: strict);
@@ -373,6 +375,9 @@ class View extends JsonValue {
   final List<String> collapsed;
   final Filter? filter;
   final Map<String, Position> positions;
+
+  /// Grid sizes by node id (Go `View.Sizes`).
+  final Map<String, NodeSize> sizes;
   final Properties options;
 
   /// A copy with the given fields replaced; [clearFilter] removes the filter.
@@ -385,6 +390,7 @@ class View extends JsonValue {
     Filter? filter,
     bool clearFilter = false,
     Map<String, Position>? positions,
+    Map<String, NodeSize>? sizes,
     Properties? options,
   }) =>
       View(
@@ -395,6 +401,7 @@ class View extends JsonValue {
         collapsed: collapsed ?? this.collapsed,
         filter: clearFilter ? null : (filter ?? this.filter),
         positions: positions ?? this.positions,
+        sizes: sizes ?? this.sizes,
         options: options ?? this.options,
       );
 
@@ -410,8 +417,33 @@ class View extends JsonValue {
           'positions': {
             for (final e in positions.entries) e.key: [e.value.$1, e.value.$2]
           },
+        if (sizes.isNotEmpty) 'sizes': {for (final e in sizes.entries) e.key: e.value.toJson()},
         if (options.isNotEmpty) 'options': options,
       };
+}
+
+/// A node's box in a grid layout (Go `model.Size`): [w] tenths of its
+/// parent's content width (1–[maxW]) and [h] fixed row units (1–[maxH]).
+/// 0 is auto.
+class NodeSize extends JsonValue {
+  const NodeSize({this.w = 0, this.h = 0});
+
+  factory NodeSize.fromJson(Object? json, {bool strict = false}) => readNodeSize(json, 'size', strict: strict);
+
+  static const maxW = 10;
+  static const maxH = 20;
+
+  final int w;
+  final int h;
+
+  /// Whether this sets a width or height and each set value is in range
+  /// (Go `model.SizeInBounds`).
+  bool get inBounds => (w != 0 || h != 0) && w >= 0 && w <= maxW && h >= 0 && h <= maxH;
+
+  NodeSize copyWith({int? w, int? h}) => NodeSize(w: w ?? this.w, h: h ?? this.h);
+
+  @override
+  Map<String, Object?> toJson() => {if (w != 0) 'w': w, if (h != 0) 'h': h};
 }
 
 /// Narrows the elements shown or searched. Empty fields match all.

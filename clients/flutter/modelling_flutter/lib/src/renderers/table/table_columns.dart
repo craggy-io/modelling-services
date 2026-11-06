@@ -11,6 +11,7 @@ import '../../controller/model_controller.dart';
 import '../../controller/model_editing.dart';
 import '../../controller/model_types.dart';
 import '../../inspector/field_editors.dart';
+import '../../shared/tags_field.dart';
 
 /// One table column. [property] is set for property columns.
 class TableColumn {
@@ -20,6 +21,9 @@ class TableColumn {
   final String title;
   final double width;
   final String? property;
+
+  /// This column [by] times as wide.
+  TableColumn widened(double by) => TableColumn(id, title, width * by, property: property);
 }
 
 /// The columns for areas ([edges] false) or relationships: the fixed ones,
@@ -118,11 +122,7 @@ Widget? cellEditor(BuildContext context, ModelController c, ModelElementRef ref,
         onChanged: (v) => c.setFields(ref, {'kind': v}),
       );
     case 'tags':
-      return CommitField(
-        key: key,
-        value: x.tags.join(', '),
-        onCommit: (v) => done(c.setFields(ref, {'tags': parseTags(v)})),
-      );
+      return TagsField(key: key, tags: x.tags, dense: true, onChanged: (tags) => c.setTags(ref, tags));
     case _ when col.property != null:
       final spec = propertySpecs(c, ref, x.kind)[col.property!];
       return KeyedSubtree(

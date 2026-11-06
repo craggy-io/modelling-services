@@ -196,9 +196,27 @@ func (m Model) Issues(l Limits) []Issue {
 		if !renderer.MatchString(v.Renderer) {
 			add("view.renderer", v.ID, "view %q has an invalid renderer %q", v.ID, v.Renderer)
 		}
+		for _, id := range SortedKeys(v.Sizes) {
+			if sz := v.Sizes[id]; !identifier.MatchString(id) || !SizeInBounds(sz) {
+				add("view.size", v.ID, "view %q has an invalid size for %q (w %d of 1–%d, h %d of 1–%d)", v.ID, id, sz.W, MaxSizeW, sz.H, MaxSizeH)
+			}
+		}
 		checkProperties(v.ID, v.Options, l, add)
 	}
 	return out
+}
+
+// MaxSizeW and MaxSizeH bound a view Size: tenths of the parent's width and
+// row units.
+const (
+	MaxSizeW = 10
+	MaxSizeH = 20
+)
+
+// SizeInBounds reports whether s sets a width or height and each set value
+// is in range (0 is auto).
+func SizeInBounds(s Size) bool {
+	return (s.W != 0 || s.H != 0) && s.W >= 0 && s.W <= MaxSizeW && s.H >= 0 && s.H <= MaxSizeH
 }
 
 type addFunc func(code, element, format string, args ...any)

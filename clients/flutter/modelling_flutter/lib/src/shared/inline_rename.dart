@@ -9,7 +9,7 @@ import '../controller/model_controller.dart';
 import '../controller/model_editing.dart';
 import '../controller/model_types.dart';
 
-class InlineRenameField extends StatelessWidget {
+class InlineRenameField extends StatefulWidget {
   const InlineRenameField({super.key, required this.controller, required this.onCommit, required this.onCancel});
 
   final TextEditingController controller;
@@ -17,23 +17,46 @@ class InlineRenameField extends StatelessWidget {
   final VoidCallback onCancel;
 
   @override
+  State<InlineRenameField> createState() => _InlineRenameFieldState();
+}
+
+class _InlineRenameFieldState extends State<InlineRenameField> {
+  final _focus = FocusNode(debugLabel: 'rename');
+
+  @override
+  void initState() {
+    super.initState();
+    // Takes focus explicitly: autofocus is ignored while the renderer
+    // (or the button that started the rename) still holds it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => Focus(
     onFocusChange: (has) {
-      if (!has) onCommit();
+      if (!has) widget.onCommit();
     },
     onKeyEvent: (_, event) {
       if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-        onCancel();
+        widget.onCancel();
         return KeyEventResult.handled;
       }
       return KeyEventResult.ignored;
     },
     child: ModelChrome.of(context).textField(
       key: const ValueKey('rename-field'),
-      controller: controller,
-      autofocus: true,
+      controller: widget.controller,
+      focusNode: _focus,
       dense: true,
-      onSubmitted: (_) => onCommit(),
+      onSubmitted: (_) => widget.onCommit(),
     ),
   );
 }
@@ -51,6 +74,40 @@ mixin InlineRenameState<T extends StatefulWidget> on State<T> {
   String? _renaming;
 
   String? get renaming => _renaming;
+
+  ModelController? _requests;
+
+  @override
+  void initState() {
+    super.initState();
+    _listen();
+  }
+
+  @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _listen();
+  }
+
+  // Follows controller.renameRequest, re-subscribing when the widget's
+  // controller changes.
+  void _listen() {
+    if (identical(_requests, controller)) return;
+    _requests?.renameRequest.removeListener(_onRenameRequest);
+    _requests = controller..renameRequest.addListener(_onRenameRequest);
+    _onRenameRequest();
+  }
+
+  // Starts renaming once the requested area has been built.
+  void _onRenameRequest() {
+    final id = controller.renameRequest.value;
+    if (id == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || controller.renameRequest.value != id) return;
+      controller.renameRequest.value = null;
+      startRename(id);
+    });
+  }
 
   void startRename(String id) {
     final n = controller.index.node(id);
@@ -81,6 +138,7 @@ mixin InlineRenameState<T extends StatefulWidget> on State<T> {
 
   @override
   void dispose() {
+    _requests?.renameRequest.removeListener(_onRenameRequest);
     renameText.dispose();
     super.dispose();
   }

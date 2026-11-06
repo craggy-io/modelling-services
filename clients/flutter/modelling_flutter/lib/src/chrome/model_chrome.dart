@@ -21,14 +21,37 @@ class ModelOption<T> {
   final String label;
 }
 
-/// One entry in [ModelChrome.menuButton].
+/// One row of a menu: an item, a submenu or a divider.
 @immutable
-class ModelMenuItem {
-  const ModelMenuItem({required this.label, this.icon, required this.onSelected});
+sealed class ModelMenuEntry {
+  const ModelMenuEntry();
+}
+
+/// A choice in a menu ([ModelChrome.menuButton], [ModelChrome.menu]).
+class ModelMenuItem extends ModelMenuEntry {
+  const ModelMenuItem({required this.label, this.icon, required this.onSelected, this.shortcut});
 
   final String label;
   final IconData? icon;
   final VoidCallback onSelected;
+
+  /// The key that also runs it, shown as a hint (the menu does not bind
+  /// it; the host does, e.g. through ModelEditor.shortcuts).
+  final SingleActivator? shortcut;
+}
+
+/// A menu row that opens [entries] beside it.
+class ModelSubmenu extends ModelMenuEntry {
+  const ModelSubmenu({required this.label, this.icon, required this.entries});
+
+  final String label;
+  final IconData? icon;
+  final List<ModelMenuEntry> entries;
+}
+
+/// A hairline between groups of menu rows.
+class ModelMenuDivider extends ModelMenuEntry {
+  const ModelMenuDivider();
 }
 
 /// Builders for the host-styled pieces. Implementations must keep these
@@ -109,6 +132,17 @@ abstract class ModelChrome {
 
   /// An icon that opens a menu of [items].
   Widget menuButton({Key? key, required IconData icon, required String tooltip, required List<ModelMenuItem> items});
+
+  /// A labelled menu (a host's File menu): a ghost button that opens
+  /// [entries], with leading icons, shortcut hints, dividers and submenus.
+  Widget menu({Key? key, required String label, required List<ModelMenuEntry> entries});
+
+  /// A removable tag badge; null [onRemove] hides its ×.
+  Widget tagChip({Key? key, required String label, VoidCallback? onRemove});
+
+  /// The frame of a composite input (the tags field): the text field's
+  /// fill, border, focus ring and [label] around [child].
+  Widget fieldFrame({Key? key, required Widget child, required bool focused, required bool empty, String? label});
 
   /// A small coloured dot (change markers, lint, legends).
   Widget statusDot({Key? key, required Color color, String? tooltip, double? size});

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../chrome/model_chrome.dart';
 import '../../controller/model_controller.dart';
 import '../../controller/model_editing.dart';
+import '../../shared/drag_payloads.dart';
 import '../../shared/inline_rename.dart';
 import '../../theme/model_theme.dart';
 import 'area_box.dart';
@@ -141,11 +142,14 @@ class AreaDots extends StatelessWidget {
 
 /// The area's edit menu: add child or sibling, rename, delete.
 class AreaMenu extends StatelessWidget {
-  const AreaMenu({super.key, required this.board, required this.id, required this.title});
+  const AreaMenu({super.key, required this.board, required this.id, required this.title, this.extra = const []});
 
   final BlocksBoardHandle board;
   final String id;
   final String title;
+
+  /// Entries before Delete (the grid layout's open and size items).
+  final List<ModelMenuItem> extra;
 
   @override
   Widget build(BuildContext context) {
@@ -171,8 +175,56 @@ class AreaMenu extends StatelessWidget {
           },
         ),
         ModelMenuItem(label: 'Rename', icon: Icons.edit_outlined, onSelected: () => board.startRename(id)),
+        ...extra,
         ModelMenuItem(label: 'Delete', icon: Icons.delete_outline, onSelected: () => board.delete(id)),
       ],
+    );
+  }
+}
+
+/// A small icon an area is dragged by: [payload] is a MoveArea or a
+/// ConnectArea; [feedback] follows the pointer.
+class DragHandle extends StatelessWidget {
+  const DragHandle({
+    super.key,
+    required this.payload,
+    required this.icon,
+    required this.tooltip,
+    required this.feedback,
+    this.extent = 28,
+  });
+
+  final Object payload;
+  final IconData icon;
+  final String tooltip;
+  final Widget feedback;
+
+  /// The square it takes, its icon centred.
+  final double extent;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = ModelTheme.of(context);
+    return Draggable<Object>(
+      data: payload,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      feedback: ModelThemeScope(
+        theme: t,
+        child: Directionality(textDirection: TextDirection.ltr, child: feedback),
+      ),
+      child: MouseRegion(
+        cursor: payload is MoveArea ? SystemMouseCursors.grab : SystemMouseCursors.precise,
+        child: ModelChrome.of(context).tooltip(
+          message: tooltip,
+          child: Semantics(
+            label: tooltip,
+            child: SizedBox.square(
+              dimension: extent,
+              child: Center(child: Icon(icon, size: 16, color: t.muted)),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

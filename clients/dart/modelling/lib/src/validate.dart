@@ -196,6 +196,13 @@ List<Issue> modelIssues(Model m, Limits limits) {
     if (!_renderer.hasMatch(v.renderer)) {
       add('view.renderer', v.id, 'view ${q(v.id)} has an invalid renderer ${q(v.renderer)}');
     }
+    for (final id in sortedKeys(v.sizes)) {
+      final sz = v.sizes[id]!;
+      if (!validId(id) || !sz.inBounds) {
+        add('view.size', v.id,
+            'view ${q(v.id)} has an invalid size for ${q(id)} (w ${sz.w} of 1–${NodeSize.maxW}, h ${sz.h} of 1–${NodeSize.maxH})');
+      }
+    }
     _checkProperties(v.id, v.options, l, add);
   }
   return out;

@@ -39,7 +39,10 @@ dependencies, as with the uncommitted `go.work` on the Go side.
    goes through `controller.replace(next, base:)`.
 3. **Show**: `ModelWorkspace(controller:, renderers:, onEvidence:, onAttachEvidence:, onOpenLink:, onSave:)`.
    The hooks are the host's: open an evidence ref, pick evidence to cite, follow a `link` to another model,
-   persist edits.
+   persist edits. For a standalone design tool, `ModelEditor` takes the same arguments and adds a
+   component palette, a Layers tree, a docked inspector, a status bar and grid blocks
+   (`BlocksRenderer(grid: true)`, sized in tenths of the parent's width and rows by the view's `sizes`).
+   `ModelWorkspace` stays the compact embedded board that craggy-labs uses.
 4. **Overlay** host data that the model doesn't own (findings, coverage, verdicts) with
    `controller.overlays`: a badge, colour and value per node id plus a legend. It is never saved into the
    document.
@@ -48,7 +51,7 @@ dependencies, as with the uncommitted `go.work` on the Go side.
 
 | Id | Renderer | Best for |
 | --- | --- | --- |
-| `blocks` | `BlocksRenderer` | The default: nested areas with relationship dots and connectors |
+| `blocks` | `BlocksRenderer` | The default: nested areas with relationship dots and connectors. `grid: true` lays children on a 10-column grid with resize handles (`ModelEditor`'s default) |
 | `outline` | `OutlineRenderer` | Narrow screens, screen readers, keyboard editing |
 | `graph` | `GraphRenderer` | Seeing relationships: node-link canvas, containment boxes, layered auto layout, dragged positions saved in the view |
 | `matrix` | `MatrixRenderer` | Large models, cycles and layering: node × node grid of edge counts |

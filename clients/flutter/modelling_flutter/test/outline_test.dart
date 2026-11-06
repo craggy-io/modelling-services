@@ -7,6 +7,8 @@ import 'support/fixtures.dart';
 
 Finder row(String id) => find.byKey(ValueKey('outline-$id'));
 
+String labelFor(String id) => appModel().nodeById(id)!.label;
+
 Future<ModelController> pumpOutline(WidgetTester tester, ModelController c, {Size size = const Size(1000, 900)}) async {
   c.renderer = 'outline';
   await pumpWorkspace(tester, c, size: size);
@@ -54,6 +56,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(row('pinner'), findsOneWidget);
     expect(row('app'), findsNothing);
+  });
+
+  testWidgets('trailing actions keep one column at the right edge of every row', (tester) async {
+    await pumpOutline(tester, ModelController(appModel()));
+    // Short and long labels, at three depths.
+    final ids = ['app', 'ui', 'net', 'pinner', 'server'];
+    final rights = {for (final id in ids) id: tester.getRect(find.byTooltip('Inspect ${labelFor(id)}')).right};
+    for (final id in ids) {
+      expect(rights[id], rights['app'], reason: id);
+      final actions = tester.getRect(find.byKey(ValueKey('outline-actions-$id')));
+      expect(actions.right, closeTo(tester.getRect(row(id)).right, 8), reason: id);
+    }
   });
 
   testWidgets('switching renderer keeps the place', (tester) async {

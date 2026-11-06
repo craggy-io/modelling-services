@@ -21,7 +21,7 @@ import '../workspace/model_shortcuts.dart';
 import 'view_switcher.dart';
 
 /// A host action in the editor's top bar. The first, the host's lead, is a
-/// labelled secondary button at the widest sizes; the rest are icon buttons
+/// labelled primary button at the widest sizes; the rest are icon buttons
 /// with the label as tooltip. A narrow bar moves them all into its overflow
 /// menu.
 @immutable
@@ -238,7 +238,7 @@ class _EditorTopBarState extends State<EditorTopBar> {
                 key: a.key,
                 label: a.label,
                 icon: a.icon,
-                variant: ModelButtonVariant.secondary,
+                variant: ModelButtonVariant.primary,
                 size: ModelButtonSize.sm,
                 onPressed: a.onPressed,
               )

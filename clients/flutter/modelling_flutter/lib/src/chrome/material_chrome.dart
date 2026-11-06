@@ -42,7 +42,9 @@ class MaterialModelChrome extends ModelChrome {
         padding: EdgeInsets.symmetric(horizontal: variant == ModelButtonVariant.link ? 4 : (small ? 10 : 12)),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
-        textStyle: (small ? t.small : t.standard).copyWith(fontWeight: FontWeight.w500),
+        textStyle: (small ? t.small : t.standard).copyWith(
+          fontWeight: variant == ModelButtonVariant.primary ? FontWeight.w600 : FontWeight.w500,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(t.radius)),
       );
       final text = Text(label, maxLines: 1, overflow: TextOverflow.ellipsis);

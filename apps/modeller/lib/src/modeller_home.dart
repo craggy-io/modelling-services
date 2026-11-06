@@ -150,7 +150,7 @@ class _ModellerHomeState extends State<ModellerHome> {
           actions: [
             ModelEditorAction(
               key: const ValueKey('connect-agent'),
-              label: 'Connect agent',
+              label: 'Agent MCP',
               icon: Icons.smart_toy_outlined,
               onPressed: () => showAgentDialog(context),
             ),

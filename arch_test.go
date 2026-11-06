@@ -19,19 +19,20 @@ func allow(from []string, imports ...string) archtest.Rule {
 }
 
 // TestLayering enforces the AGENTS.md layer table: format, then engines,
-// then host adapters. Only modelcap may import capability-services, and only
-// kinds the foundation-kit bundle packages.
+// then host adapters, then commands. Only modelcap and the commands may import
+// capability-services, and only kinds the foundation-kit bundle packages.
 func TestLayering(t *testing.T) {
 	archtest.Check(t, archtest.Config{
-		Packages: []string{"./model", "./diff", "./edit", "./query", "./export", "./modelcap", "./kinds"},
+		Packages: []string{"./model", "./diff", "./edit", "./query", "./export", "./modelcap", "./kinds", "./cmd/..."},
 		Rules: []archtest.Rule{
 			allow([]string{"./model"}),
 			allow([]string{"./diff", "./edit", "./query", "./export"}, "./model"),
 			allow([]string{"./modelcap"}, "./model", "./diff", "./edit", "./query", "./export"),
 			allow([]string{"./kinds"}, "./model"),
+			allow([]string{"./cmd/..."}, "./model", "./modelcap"),
 			{
-				Name: "only modelcap serves capabilities", Why: "engines are transport-free",
-				From: []string{"./..."}, Except: []string{"./modelcap"},
+				Name: "only modelcap and commands serve capabilities", Why: "engines are transport-free",
+				From: []string{"./..."}, Except: []string{"./modelcap", "./cmd/..."},
 				Forbid: []string{"github.com/craggy-io/capability-services/..."},
 			},
 			{

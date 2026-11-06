@@ -7,7 +7,6 @@ import (
 
 	"github.com/craggy-io/modelling-services/diff"
 	"github.com/craggy-io/modelling-services/edit"
-	"github.com/craggy-io/modelling-services/export"
 	"github.com/craggy-io/modelling-services/model"
 	"github.com/craggy-io/modelling-services/query"
 )
@@ -57,19 +56,7 @@ func (in createIn) model() (model.Model, error) {
 	if in.Document != nil {
 		return normalize(*in.Document)
 	}
-	switch in.Import.Format {
-	case "mermaid":
-		return export.ParseMermaid(in.Import.Source)
-	case "outline":
-		return export.ParseOutline(in.Import.Source)
-	case "csv":
-		title := in.Import.Title
-		if title == "" {
-			title = "Imported model"
-		}
-		return export.ParseCSV(title, []byte(in.Import.Source), []byte(in.Import.Edges))
-	}
-	return model.Model{}, fmt.Errorf("%w: %w %q (want mermaid, outline or csv)", model.ErrInvalid, errFormat, in.Import.Format)
+	return in.Import.parse()
 }
 
 type updateIn struct {
@@ -126,8 +113,13 @@ type lintOut struct {
 }
 
 type queryIn struct {
-	Scope     string          `json:"id" jsonschema:"the scope the models live in"`
-	Model     string          `json:"model" jsonschema:"model revision"`
+	Scope string `json:"id" jsonschema:"the scope the models live in"`
+	Model string `json:"model" jsonschema:"model revision"`
+	queryArgs
+}
+
+// queryArgs is the question a query asks.
+type queryArgs struct {
 	Fn        string          `json:"fn" jsonschema:"neighbours, paths, impact or search"`
 	ID        string          `json:"node,omitempty" jsonschema:"node for neighbours and impact"`
 	Direction query.Direction `json:"direction,omitempty" jsonschema:"out, in or both (default)"`
@@ -153,14 +145,4 @@ type exportIn struct {
 type exportOut struct {
 	Text  string `json:"text"`
 	Edges string `json:"edges,omitempty" jsonschema:"csv only: the edges table"`
-}
-
-// normalize fills what a decoded document always has: format, version and
-// evidence ids.
-func normalize(m model.Model) (model.Model, error) {
-	raw, err := model.Encode(m)
-	if err != nil {
-		return m, err
-	}
-	return model.Decode(raw)
 }

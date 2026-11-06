@@ -48,6 +48,18 @@ Run it locally:
 cd apps/modeller && flutter run -d chrome     # or -d windows
 ```
 
+## For agents
+
+Point an agent at the hosted MCP server and it can sketch, edit, check and export models, then
+hand you a link that opens the result in the modeller. Nothing is stored and there are no accounts.
+
+```bash
+claude mcp add --transport http craggy-models https://models.craggy.io/mcp
+```
+
+Or run it locally over stdio with `go install github.com/craggy-io/modelling-services/cmd/modelling-mcp@latest`.
+See [mcp](docs/mcp.md) for the tools and other clients.
+
 ## Features
 
 - **One format** ([format](docs/format.md)): `craggy.model` version 2, with a [JSON Schema](schema/model.v2.schema.json), canonical encoding, strict decoding, bounds, and an upgrade from the version 1 graphs craggy-labs stored.
@@ -55,7 +67,8 @@ cd apps/modeller && flutter run -d chrome     # or -d windows
 - **Revision diffs** ([diff](docs/diff.md)): nodes and edges added, removed or changed, with each field's old and new value.
 - **Queries and lint** ([query](docs/query.md)): search, neighbours, paths, impact, and lint rules, including checks against an optional profile (node and edge kinds, containment rules, typed properties).
 - **Import and export** ([export](docs/export.md)): Mermaid and Markdown outline both ways (byte-identical in Go and Dart), CSV both ways, Graphviz DOT and static SVG out.
-- **Capabilities** ([modelcap](docs/modelcap.md)): `<prefix>.list/read/create/update/apply/attach/diff/lint/query/export` over a storage port the host implements.
+- **Capabilities** ([modelcap](docs/modelcap.md)): `<prefix>.list/read/create/update/apply/attach/diff/lint/query/export` over a storage port the host implements, and stateless tools over documents the caller holds.
+- **MCP server** ([mcp](docs/mcp.md)): `cmd/modelling-mcp` serves the stateless tools over stdio or streamable HTTP, hosted at `https://models.craggy.io/mcp`.
 - **Bundle kinds** (`kinds`): ship profiles (`craggy.model-profile@1`) and template models (`craggy.model@1`) as foundation-kit bundle content.
 - **Dart and Flutter** ([flutter](docs/flutter.md)): `clients/dart/modelling` (pure Dart: format, engines, edit history) and `clients/flutter/modelling_flutter` (controller, renderers, editor, theme, file sources), plus the standalone `apps/modeller`.
 
@@ -67,6 +80,7 @@ cd apps/modeller && flutter run -d chrome     # or -d windows
 | `diff`, `edit`, `query`, `export` | Engines over `model` |
 | `modelcap` | capability-services registrations over a `Store` |
 | `kinds` | foundation-kit bundle kinds and compilers |
+| `cmd/modelling-mcp` | The MCP server (stdio and HTTP) and its container image |
 | `schema/` | JSON Schemas: model v2, model v1 (read only), profile v1 |
 | `conformance/` | Shared vectors; Go runs them in `conformance/`, Dart in `clients/dart/modelling/test` |
 | `clients/dart/modelling` | The Dart twin of the Go engines |

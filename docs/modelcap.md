@@ -47,3 +47,16 @@ receipt (a run id, say), the stored document and its lint errors and warnings.
 
 Errors: `model.ErrInvalid` (validation, edit and import failures) maps to `invalid`; everything
 else goes through the host's `Codes`.
+
+## Stateless tools
+
+`modelcap.Tools` serves the same engines over documents the caller holds: no store, scope or
+profile resolver. Each takes the whole document (and, for lint, an optional profile) and returns
+what it computed. `cmd/modelling-mcp` serves them to agents; see [mcp](mcp.md).
+
+```go
+tools := modelcap.NewTools(modelcap.ToolDeps{Prefix: "model", Editor: "https://models.craggy.io/"})
+reg.Add(tools.Capabilities()...) // model.check, .import, .apply, .diff, .query, .export, .open
+```
+
+`modelcap.Link(editor, m)` builds the modeller link `model.open` returns.

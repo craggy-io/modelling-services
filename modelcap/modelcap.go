@@ -87,19 +87,9 @@ func (s *Service[S]) read(ctx context.Context, scope, id string) (model.Model, e
 	return m, m.Validate(s.d.Limits)
 }
 
-// lint is the findings worth showing a writer: errors and warnings.
-func (s *Service[S]) lint(ctx context.Context, scope string, m model.Model) ([]query.Finding, error) {
-	all, err := s.lintAll(ctx, scope, m)
-	var out []query.Finding
-	for _, f := range all {
-		if f.Severity != query.Info {
-			out = append(out, f)
-		}
-	}
-	return out, err
-}
-
-func (s *Service[S]) lintAll(ctx context.Context, scope string, m model.Model) ([]query.Finding, error) {
+// lint is m's findings against the profile it names, resolved in scope.
+// Without all, only errors and warnings: the findings worth showing a writer.
+func (s *Service[S]) lint(ctx context.Context, scope string, m model.Model, all bool) ([]query.Finding, error) {
 	var profile *model.Profile
 	if m.Profile != "" && s.d.Profiles != nil {
 		p, err := s.d.Profiles(ctx, scope, m.Profile)
@@ -108,7 +98,7 @@ func (s *Service[S]) lintAll(ctx context.Context, scope string, m model.Model) (
 		}
 		profile = p
 	}
-	return query.Lint(model.NewIndex(m), profile), nil
+	return lintWith(m, profile, all), nil
 }
 
 // saved is a write's output: the stored revision, its document and the
@@ -117,7 +107,7 @@ func (s *Service[S]) saved(ctx context.Context, scope string, sv Saved, m model.
 	if err != nil {
 		return writeOut{}, s.codes.Wrap(err)
 	}
-	findings, err := s.lint(ctx, scope, m)
+	findings, err := s.lint(ctx, scope, m, false)
 	if err != nil {
 		return writeOut{}, s.codes.Wrap(err)
 	}

@@ -33,8 +33,18 @@
 
   <title>Modeller · Craggy</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="alternate" type="text/plain" href="llms.txt" title="Guide for AI agents">
 </head>
 <body>
+  <!-- For agents and screen readers that read the page as text; the app draws on a canvas. -->
+  <div id="agent-guide" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">
+    <h1>Craggy Modeller</h1>
+    <p>A visual editor for block models of systems: nested areas, relationships, evidence and checks, saved as craggy.model JSON.</p>
+    <h2>For AI agents</h2>
+    <p>Connect to the MCP server at https://models.craggy.io/mcp (streamable HTTP, no accounts, nothing stored). Its tools import, check, edit, query and export models, and model_open returns a link that opens a model here.</p>
+    <p>Claude Code: claude mcp add --transport http craggy-models https://models.craggy.io/mcp</p>
+    <p>Full guide: <a href="llms.txt">https://models.craggy.io/llms.txt</a>. Source: <a href="https://github.com/craggy-io/modelling-services">github.com/craggy-io/modelling-services</a>.</p>
+  </div>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

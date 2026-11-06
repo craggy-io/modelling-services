@@ -20,8 +20,10 @@ import '../workspace/model_export.dart';
 import '../workspace/model_shortcuts.dart';
 import 'view_switcher.dart';
 
-/// A host action in the editor's top bar (a button when there is room,
-/// else an overflow menu entry).
+/// A host action in the editor's top bar. The first, the host's lead, is a
+/// labelled secondary button at the widest sizes; the rest are icon buttons
+/// with the label as tooltip. A narrow bar moves them all into its overflow
+/// menu.
 @immutable
 class ModelEditorAction {
   const ModelEditorAction({required this.label, required this.icon, required this.onPressed, this.key});
@@ -228,16 +230,26 @@ class _EditorTopBarState extends State<EditorTopBar> {
               for (final e in ModelExport.values) ModelMenuItem(label: e.label, onSelected: () => widget.onExport(e)),
             ],
           ),
-          for (final a in widget.actions) ...[
+          for (final (i, a) in widget.actions.indexed) ...[
             gap,
-            chrome.button(
-              key: a.key,
-              label: a.label,
-              icon: a.icon,
-              variant: ModelButtonVariant.ghost,
-              size: ModelButtonSize.sm,
-              onPressed: a.onPressed,
-            ),
+            // Only the first action, the host's lead, has room for its label.
+            if (i == 0 && fit == BarFit.wide)
+              chrome.button(
+                key: a.key,
+                label: a.label,
+                icon: a.icon,
+                variant: ModelButtonVariant.secondary,
+                size: ModelButtonSize.sm,
+                onPressed: a.onPressed,
+              )
+            else
+              chrome.iconButton(
+                key: a.key,
+                icon: a.icon,
+                tooltip: a.label,
+                size: ModelButtonSize.md,
+                onPressed: a.onPressed,
+              ),
           ],
         ],
         if (widget.canSave && editable) ...[

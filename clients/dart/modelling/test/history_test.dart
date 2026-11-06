@@ -130,4 +130,15 @@ void main() {
     h.redo();
     expect(h.isDirty, isFalse);
   });
+
+  test('a never-saved model is dirty until saved', () {
+    final h = EditHistory(base(), saved: false);
+    expect(h.isDirty, isTrue);
+    expect(h.pendingOps, isEmpty);
+    h.apply([setLabel('a', 'X')]);
+    h.undo();
+    expect(h.isDirty, isTrue);
+    h.markSaved();
+    expect(h.isDirty, isFalse);
+  });
 }

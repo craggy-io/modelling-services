@@ -16,6 +16,7 @@ dependencies:
     path: ../../clients/dart/modelling
   modelling_flutter:
     path: ../../clients/flutter/modelling_flutter
+  web: ^1.1.2
 
 dev_dependencies:
   flutter_test:

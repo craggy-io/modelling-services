@@ -1,22 +1,30 @@
 // modeller_home.dart: the editor: a ModelEditor (grid blocks, palette,
 // docked inspector, every renderer) over the open model, with the app's
 // File menu (new, templates, import, open, save, save as, export) at the
-// start of its top bar and the gallery among its actions. The profile
+// start of its top bar, and connecting an agent and the gallery among its
+// actions. The profile
 // picker is the editor's model overview. Unsaved edits are confirmed
-// before they are discarded.
+// before they are discarded. A model linked in the page address opens
+// first, unsaved.
 
 import 'package:flutter/material.dart';
 import 'package:modelling/modelling.dart' hide View;
 import 'package:modelling_flutter/modelling_flutter.dart';
 
+import 'agent_dialog.dart';
 import 'gallery_page.dart';
 import 'import_dialog.dart';
+import 'model_link.dart';
 import 'samples.dart';
 
 class ModellerHome extends StatefulWidget {
-  const ModellerHome({super.key, required this.bundled});
+  const ModellerHome({super.key, required this.bundled, this.linked = (model: null, error: null)});
 
   final Bundled bundled;
+
+  /// The model linked in the page address (see [readLinkedModel]): it
+  /// opens as a new unsaved document; an error shows in the status bar.
+  final LinkedModel linked;
 
   @override
   State<ModellerHome> createState() => _ModellerHomeState();
@@ -25,8 +33,16 @@ class ModellerHome extends StatefulWidget {
 class _ModellerHomeState extends State<ModellerHome> {
   final _source = FileModelSource();
   final _exportKey = GlobalKey(debugLabel: 'modeller export');
-  late LoadedModel _loaded = _untitled(Model.empty('Untitled model', 'New model'));
-  late ModelController _c = _controllerFor(_loaded, renderer: 'blocks');
+  late LoadedModel _loaded;
+  late ModelController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    final (model: linked, error: failed) = widget.linked;
+    _loaded = _untitled(linked ?? Model.empty('Untitled model', 'New model'));
+    _c = _controllerFor(_loaded, renderer: 'blocks', saved: linked == null)..notice.value = failed;
+  }
 
   /// A model with no file yet: saving asks where, named after its title.
   static LoadedModel _untitled(Model m) => LoadedModel(
@@ -34,11 +50,12 @@ class _ModellerHomeState extends State<ModellerHome> {
     summary: ModelSummary(id: exportStem(m), title: m.title, subject: m.subject),
   );
 
-  ModelController _controllerFor(LoadedModel loaded, {required String renderer}) => ModelController(
+  ModelController _controllerFor(LoadedModel loaded, {required String renderer, bool saved = true}) => ModelController(
     loaded.model,
     base: loaded.base,
     profile: widget.bundled.profileFor(loaded.model),
     renderer: renderer,
+    saved: saved,
   );
 
   @override
@@ -131,6 +148,12 @@ class _ModellerHomeState extends State<ModellerHome> {
           leading: _menu(),
           shortcuts: {ModelKeys.newModel: _newBlank, ModelKeys.open: _open, ModelKeys.saveAs: () => _save(asNew: true)},
           actions: [
+            ModelEditorAction(
+              key: const ValueKey('connect-agent'),
+              label: 'Connect agent',
+              icon: Icons.smart_toy_outlined,
+              onPressed: () => showAgentDialog(context),
+            ),
             ModelEditorAction(
               key: const ValueKey('open-gallery'),
               label: 'Gallery',

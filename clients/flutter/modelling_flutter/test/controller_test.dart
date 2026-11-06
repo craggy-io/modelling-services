@@ -49,6 +49,13 @@ void main() {
       expect(c.pinned, isEmpty);
     });
 
+    test('a never-saved model is dirty until markSaved', () {
+      final c = ModelController(appModel(), saved: false);
+      expect(c.dirty, isTrue);
+      c.markSaved();
+      expect(c.dirty, isFalse);
+    });
+
     test('starts a fresh history and can set a base', () {
       final c = ModelController(appModel());
       c.apply([

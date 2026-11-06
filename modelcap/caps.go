@@ -10,7 +10,6 @@ import (
 	"github.com/craggy-io/modelling-services/edit"
 	"github.com/craggy-io/modelling-services/export"
 	"github.com/craggy-io/modelling-services/model"
-	"github.com/craggy-io/modelling-services/query"
 )
 
 // Capabilities are the model capabilities, named <prefix>.<operation>.
@@ -60,7 +59,7 @@ func (s *Service[S]) Capabilities() []registry.Capability {
 				sv, err := s.create(ctx, in.Scope, m, in.BasedOn)
 				return s.saved(ctx, in.Scope, sv, m, err)
 			},
-			registry.Describe("Store a new model from a complete document or an import (Mermaid flowchart, Markdown outline or CSV). A document is format \"craggy.model\", version 2: title, subject, nodes (id, label, optional parent for containment, kind, notes, tags, properties of strings/numbers/bools, evidence [{caption, ref: {scheme, id, selector}}], link) and edges (id, from, to, label, optional kind, undirected, notes, tags, properties, evidence). Containment is acyclic and edges never imply it. basedOn names the model this one starts from (recorded as lineage; that model is unchanged): keep the ids that still match. The output lists lint errors and warnings worth fixing."),
+			registry.Describe("Store a new model from a complete document or an import (Mermaid flowchart, Markdown outline or CSV). "+formatGuide+" basedOn names the model this one starts from (recorded as lineage; that model is unchanged): keep the ids that still match. The output lists lint errors and warnings worth fixing."),
 			tags),
 		registry.Func(p+"update", "Replace a model",
 			func(ctx context.Context, in updateIn) (writeOut, error) {
@@ -87,7 +86,7 @@ func (s *Service[S]) Capabilities() []registry.Capability {
 				out, err := s.saved(ctx, in.Scope, sv, next, err)
 				return applyOut{writeOut: out, Inverse: inverse}, err
 			},
-			registry.Describe("Apply a list of small operations to a model and store the result as its next revision, all or nothing. Operations: node.add {node, index?}, node.remove {id, cascade?}, node.move {id, parent, index?}, node.set {id, fields: label|kind|notes|tags|link}, edge.add {edge}, edge.remove {id}, edge.set {id, fields: label|from|to|kind|undirected|notes|tags}, prop.set/prop.unset {target: node|edge, id, key, value}, evidence.add {target, id, evidence}, evidence.remove {target, id, evidenceId}, model.set {fields: title|subject|notes|profile|tags}, view.put {view}, view.remove {id}. In fields, null clears. The output carries the inverse operations, which undo the change."),
+			registry.Describe("Apply a list of small operations to a model and store the result as its next revision, all or nothing. "+opsGuide+" The output carries the inverse operations, which undo the change."),
 			registry.WithExample("add an area inside another and connect it", applyIn{Scope: "scope-1", Model: "model-1", Ops: []edit.Op{
 				{Op: edit.NodeAdd, Node: &model.Node{ID: "token-parser", Label: "Token parser", Parent: "native"}},
 				{Op: edit.EdgeAdd, Edge: &model.Edge{ID: "ui--token-parser", From: "ui", To: "token-parser", Label: "passes tokens to"}},
@@ -119,28 +118,30 @@ func (s *Service[S]) Capabilities() []registry.Capability {
 				if err != nil {
 					return lintOut{}, s.codes.Wrap(err)
 				}
-				var findings []query.Finding
-				if in.All {
-					findings, err = s.lintAll(ctx, in.Scope, m)
-				} else {
-					findings, err = s.lint(ctx, in.Scope, m)
-				}
-				if findings == nil {
-					findings = []query.Finding{}
-				}
+				findings, err := s.lint(ctx, in.Scope, m, in.All)
 				return lintOut{Findings: findings}, s.codes.Wrap(err)
 			},
 			registry.Describe("Likely mistakes in a model: duplicate sibling labels, repeated relationships, edges to an area's own container, stale views and, when the model names a profile, kind and property violations. all=true adds informational findings such as elements without evidence."),
 			ro, tags),
 		registry.Func(p+"query", "Query a model",
 			func(ctx context.Context, in queryIn) (queryOut, error) {
-				return s.query(ctx, in)
+				m, err := s.read(ctx, in.Scope, in.Model)
+				if err != nil {
+					return queryOut{}, s.codes.Wrap(err)
+				}
+				out, err := ask(m, in.queryArgs)
+				return out, s.codes.Wrap(err)
 			},
 			registry.Describe("Ask a model a structural question. fn=neighbours (id, direction out|in|both, depth), paths (from, to, maxLen, maxPaths: each path as edge ids), impact (id: everything reachable forward from the area or anything inside it), search (filter: text, kinds, tags)."),
 			ro, tags),
 		registry.Func(p+"export", "Export a model",
 			func(ctx context.Context, in exportIn) (exportOut, error) {
-				return s.export(ctx, in)
+				m, err := s.read(ctx, in.Scope, in.Model)
+				if err != nil {
+					return exportOut{}, s.codes.Wrap(err)
+				}
+				out, err := exportAs(m, in.Format)
+				return out, s.codes.Wrap(err)
 			},
 			registry.Describe("Write a model as text for other tools: mermaid (flowchart), dot (Graphviz), outline (Markdown), svg (static nested blocks), or csv (nodes table in text, edges table in edges)."),
 			ro, tags),
@@ -175,67 +176,4 @@ func (s *Service[S]) attach(ctx context.Context, in attachIn) (writeOut, error) 
 	}
 	sv, err := s.d.Store.Revise(ctx, in.Scope, in.Model, next, "attach")
 	return s.saved(ctx, in.Scope, sv, next, err)
-}
-
-func (s *Service[S]) query(ctx context.Context, in queryIn) (queryOut, error) {
-	m, err := s.read(ctx, in.Scope, in.Model)
-	if err != nil {
-		return queryOut{}, s.codes.Wrap(err)
-	}
-	ix := model.NewIndex(m)
-	need := func(ids ...string) error {
-		for _, id := range ids {
-			if _, ok := ix.Node(id); !ok {
-				return s.codes.Wrap(fmt.Errorf("%w: model has no node %q", model.ErrInvalid, id))
-			}
-		}
-		return nil
-	}
-	switch in.Fn {
-	case "neighbours":
-		dir := in.Direction
-		if dir == "" {
-			dir = query.Both
-		}
-		return queryOut{Nodes: query.Neighbours(ix, in.ID, dir, in.Depth)}, need(in.ID)
-	case "paths":
-		maxLen, maxPaths := in.MaxLen, in.MaxPaths
-		if maxLen <= 0 {
-			maxLen = 6
-		}
-		if maxPaths <= 0 {
-			maxPaths = 20
-		}
-		return queryOut{Paths: query.Paths(ix, in.From, in.To, maxLen, maxPaths)}, need(in.From, in.To)
-	case "impact":
-		return queryOut{Nodes: query.Impact(ix, in.ID)}, need(in.ID)
-	case "search":
-		var f model.Filter
-		if in.Filter != nil {
-			f = *in.Filter
-		}
-		return queryOut{Nodes: query.Search(ix, f)}, nil
-	}
-	return queryOut{}, s.codes.Wrap(fmt.Errorf("%w: unknown fn %q (want neighbours, paths, impact or search)", model.ErrInvalid, in.Fn))
-}
-
-func (s *Service[S]) export(ctx context.Context, in exportIn) (exportOut, error) {
-	m, err := s.read(ctx, in.Scope, in.Model)
-	if err != nil {
-		return exportOut{}, s.codes.Wrap(err)
-	}
-	switch in.Format {
-	case "mermaid":
-		return exportOut{Text: export.Mermaid(m)}, nil
-	case "dot":
-		return exportOut{Text: export.DOT(m)}, nil
-	case "outline":
-		return exportOut{Text: export.Outline(m)}, nil
-	case "svg":
-		return exportOut{Text: export.SVG(m, export.SVGOptions{})}, nil
-	case "csv":
-		nodes, edges, err := export.CSV(m)
-		return exportOut{Text: string(nodes), Edges: string(edges)}, s.codes.Wrap(err)
-	}
-	return exportOut{}, s.codes.Wrap(fmt.Errorf("%w: %w %q (want mermaid, dot, outline, svg or csv)", model.ErrInvalid, errFormat, in.Format))
 }

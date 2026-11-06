@@ -1,0 +1,9 @@
+# Only the Go module goes into the MCP server image.
+*
+!go.mod
+!go.sum
+!**/*.go
+!schema/
+**/*_test.go
+apps/
+clients/

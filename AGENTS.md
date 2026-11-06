@@ -17,7 +17,8 @@ Design authority: [docs/design.md](docs/design.md). Use foundation-kit's ADR-000
 | Search, neighbours, paths, impact, lint | `query` | `modelling` |
 | Mermaid / outline text | `export` | `modelling` |
 | DOT, CSV, SVG | `export` | — (call the host's `<prefix>.export`) |
-| Serve models as capabilities | `modelcap` | — |
+| Serve models as capabilities | `modelcap` (`Service` over a store, `Tools` stateless) | — |
+| Serve the tools to agents over MCP | `cmd/modelling-mcp` | — |
 | Ship profiles and templates in bundles | `kinds` | — |
 | Render, edit, theme, load and save in Flutter | — | `modelling_flutter` |
 
@@ -30,8 +31,9 @@ Imports point down only (enforced by `arch_test.go`):
 | Format | `model` | standard library, `foundation-kit/canonjson` |
 | Engines | `diff`, `edit`, `query`, `export` | `model` |
 | Host adapters | `modelcap` (capability-services), `kinds` (foundation-kit bundle/kind) | format and engines |
+| Commands | `cmd/modelling-mcp` | `model`, `modelcap` |
 
-Engines are transport-free and never import each other. Only `modelcap` imports
+Engines are transport-free and never import each other. Only `modelcap` and the commands import
 capability-services; only `kinds` imports foundation-kit's bundle packages. Nothing here imports
 craggy-labs or any other application.
 

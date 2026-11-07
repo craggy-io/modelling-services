@@ -43,7 +43,7 @@ read https://models.craggy.io as text find the same in the page and in
 | `model_diff` | Compares two documents ([diff](diff.md)) |
 | `model_query` | Neighbours, paths, impact and search ([query](query.md)) |
 | `model_export` | Outline, Mermaid, DOT, SVG or CSV ([export](export.md)) |
-| `model_open` | A link that opens the document in the [Craggy Modeller](https://models.craggy.io) |
+| `model_open` | A link that opens the document in the [Craggy Modelling](https://models.craggy.io) |
 
 Every tool that takes a document validates it against the [format](format.md) and the default
 limits (512 KiB, 1,000 nodes, 2,000 edges). The tools are `modelcap.Tools`: a host that wants

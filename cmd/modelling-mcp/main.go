@@ -40,7 +40,7 @@ Nothing is stored: you keep the document and pass it to each tool. A good flow:
 1. model_import an outline (or write the document and model_check it).
 2. model_apply small operations to change it; each returns the new document and lint findings worth fixing.
 3. model_export format=outline to read a large model back cheaply; mermaid, dot, svg or csv for other tools.
-4. model_open returns a link that opens the model in the Craggy Modeller (https://models.craggy.io) for a person to view and edit visually. Share it with the user.`
+4. model_open returns a link that opens the model in Craggy Modelling (https://models.craggy.io) for a person to view and edit visually. Share it with the user.`
 
 func main() {
 	addr := flag.String("http", "", "serve streamable HTTP on this address (e.g. :8080) instead of stdio")

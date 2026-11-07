@@ -1,4 +1,4 @@
-# Craggy Modeller
+# Craggy Modelling
 
 > A visual editor for block models: labelled areas nested by containment, labelled relationships between them, typed properties and cited evidence, stored as one JSON format ("craggy.model", version 2). Agents use it through an MCP server; people view and edit the result in the browser.
 

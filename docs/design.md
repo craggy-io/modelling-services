@@ -560,7 +560,7 @@ Each phase ends with its checks run and passing; later phases don't start early.
 | **2. Dart core** | `modelling` package | Same vectors pass under `dart test`; labs client returns `Model` and deletes `ModelBoard*` |
 | **3. Blocks renderer** | Controller, `ModelTheme`, `ModelChrome`, blocks renderer at parity, diff mode with removed ghosts, state kept across revisions | Labs deletes `model_view.dart` and `model_board_view.dart`; `flutter test` and in-process screenshots match theme.md §9; `flutter build web` succeeds for the package |
 | **4. modelcap** | Store port, `apply`/`diff`/`lint`/`export` (Mermaid, outline), labs store | Labs registers modelcap; agent edit via `models.apply` covered by a labsd test |
-| **5. Editor + modeller app** | Editing ops in blocks + outline, inspector editing, undo/redo, file source (desktop + web), new-from-template/import | Modeller app runs on Windows and Chrome; widget tests drive every edit gesture |
+| **5. Editor + Modelling app** | Editing ops in blocks + outline, inspector editing, undo/redo, file source (desktop + web), new-from-template/import | Modelling app runs on Windows and Chrome; widget tests drive every edit gesture |
 | **6. More renderers** | Graph, matrix, table; DOT/SVG/CSV export | Each renderer has widget tests and a gallery page |
 | **7. Typed models** | Profiles as a bundle kind, profile-aware lint and editor, overlays in labs (findings per area), cross-model links | A profile ships with an intel pack; labs shows findings on a board |
 

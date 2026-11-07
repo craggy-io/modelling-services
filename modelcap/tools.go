@@ -187,7 +187,7 @@ func (t *Tools) Capabilities() []registry.Capability {
 				url, err := Link(t.d.Editor, m)
 				return openOut{URL: url}, t.codes.Wrap(err)
 			},
-			registry.Describe("A link that opens the model in the Craggy Modeller, a visual editor in the browser, for a person to view and edit. The model travels inside the link's fragment, which browsers never send to a server. Give the link to the user; they can save the model from the modeller as a .json file."),
+			registry.Describe("A link that opens the model in Craggy Modelling, a visual editor in the browser, for a person to view and edit. The model travels inside the link's fragment, which browsers never send to a server. Give the link to the user; they can save the model from the modeller as a .json file."),
 			ro, tags),
 	}
 }

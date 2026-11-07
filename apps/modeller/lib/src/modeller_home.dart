@@ -2,7 +2,7 @@
 // docked inspector, every renderer) over the open model, with the app's
 // File menu (new, templates, import, open, save, save as, export) at the
 // start of its top bar, and connecting an agent and the gallery among its
-// actions. The profile
+// actions, and the craggy.io account at its end. The profile
 // picker is the editor's model overview. Unsaved edits are confirmed
 // before they are discarded. A model linked in the page address opens
 // first, unsaved.
@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:modelling/modelling.dart' hide View;
 import 'package:modelling_flutter/modelling_flutter.dart';
 
+import 'account_button.dart';
 import 'agent_dialog.dart';
 import 'gallery_page.dart';
 import 'import_dialog.dart';
@@ -146,6 +147,7 @@ class _ModellerHomeState extends State<ModellerHome> {
           onOpenLink: (link) => _c.notice.value = 'Open ${link.model} with File › Open.',
           onEvidence: (ref) => _c.notice.value = 'Evidence ${ref.scheme}:${ref.id}${ref.selector}',
           leading: _menu(),
+          trailing: AccountButton(mayLeave: _mayDiscard),
           shortcuts: {ModelKeys.newModel: _newBlank, ModelKeys.open: _open, ModelKeys.saveAs: () => _save(asNew: true)},
           actions: [
             ModelEditorAction(

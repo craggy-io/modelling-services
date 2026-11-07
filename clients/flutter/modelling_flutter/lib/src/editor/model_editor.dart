@@ -39,6 +39,7 @@ class ModelEditor extends StatefulWidget {
     this.openLabel = 'Open',
     this.exportName,
     this.leading,
+    this.trailing,
     this.actions = const [],
     this.shortcuts = const {},
     this.profiles = const [],
@@ -74,6 +75,9 @@ class ModelEditor extends StatefulWidget {
   /// The host's widget at the start of the top bar (a File menu, a back
   /// button).
   final Widget? leading;
+
+  /// The host's widget at the very end of the top bar (an account button).
+  final Widget? trailing;
 
   /// The host's top bar actions.
   final List<ModelEditorAction> actions;
@@ -259,6 +263,7 @@ class _ModelEditorState extends State<ModelEditor> {
           renderers: widget.renderers,
           active: renderer,
           leading: widget.leading,
+          trailing: widget.trailing,
           actions: widget.actions,
           canSave: widget.onSave != null,
           saving: _saving,

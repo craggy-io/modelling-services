@@ -1,7 +1,7 @@
 // editor_top_bar.dart: the editor's one-row top bar. Panel toggles, the
 // host's leading widget, the model title (renamed in place) with a dirty
-// dot, the view switcher, search, undo/redo, export, the host's actions and
-// Save. Three slots: the left group at the start, the right group flush
+// dot, the view switcher, search, undo/redo, export, the host's actions,
+// Save and the host's trailing widget. Three slots: the left group at the start, the right group flush
 // with the end, the switcher centred on the bar. It never wraps: as it
 // narrows, the title ellipsizes, the switcher drops its labels, search
 // folds into a button, and the rest moves into an overflow menu.
@@ -52,6 +52,7 @@ class EditorTopBar extends StatefulWidget {
     required this.renderers,
     required this.active,
     required this.leading,
+    this.trailing,
     required this.actions,
     required this.canSave,
     required this.saving,
@@ -65,6 +66,9 @@ class EditorTopBar extends StatefulWidget {
   final List<ModelRenderer> renderers;
   final ModelRenderer active;
   final Widget? leading;
+
+  /// The host's widget at the very end of the bar (an account button).
+  final Widget? trailing;
   final List<ModelEditorAction> actions;
   final bool canSave;
   final bool saving;
@@ -273,6 +277,7 @@ class _EditorTopBarState extends State<EditorTopBar> {
             onPressed: widget.onToggleRight,
           ),
         ],
+        if (widget.trailing case final trailing?) ...[SizedBox(width: t.spacing.xs), trailing],
       ],
     );
     return CustomMultiChildLayout(

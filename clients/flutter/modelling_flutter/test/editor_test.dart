@@ -19,6 +19,7 @@ Future<ModelController> pumpEditor(
   ModelSaveHook? onSave,
   List<ModelRenderer> renderers = const [BlocksRenderer(grid: true), OutlineRenderer()],
   Widget? leading,
+  Widget? trailing,
 }) async {
   final c = ModelController(model ?? appModel(), profile: model == null ? androidProfile() : null);
   tester.view.physicalSize = size;
@@ -35,6 +36,7 @@ Future<ModelController> pumpEditor(
           profiles: [androidProfile()],
           renderers: renderers,
           leading: leading,
+          trailing: trailing,
         ),
       ),
     ),
@@ -243,6 +245,49 @@ void main() {
     // The title has room, so it is not cut short.
     final title = tester.renderObject<RenderParagraph>(find.byKey(const ValueKey('editor-title')));
     expect(title.didExceedMaxLines, isFalse);
+  });
+
+  testWidgets("the host's trailing widget ends the bar, after the inspector toggle", (tester) async {
+    for (final width in [1900.0, 800.0]) {
+      await pumpEditor(
+        tester,
+        size: Size(width, 1000),
+        onSave: (ops, result) async {},
+        trailing: const SizedBox.square(key: ValueKey('host-trailing'), dimension: 32),
+      );
+      final bar = tester.getRect(find.byType(EditorTopBar));
+      final trailing = tester.getRect(find.byKey(const ValueKey('host-trailing')));
+      expect(bar.right - trailing.right, lessThanOrEqualTo(8.5), reason: 'at $width');
+      expect(tester.getRect(find.byKey(const ValueKey('toggle-right-panel'))).right, lessThan(trailing.left));
+    }
+  });
+
+  testWidgets('a badged menu button shows its badge and opens its menu', (tester) async {
+    var picked = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (context) => ModelChrome.of(context).menuButton(
+                icon: Icons.account_circle,
+                badge: 'AL',
+                tooltip: 'Signed in as Ada',
+                items: [ModelMenuItem(label: 'Sign out', onSelected: () => picked++)],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('AL'), findsOneWidget);
+    expect(find.byIcon(Icons.account_circle), findsNothing);
+    await tester.tap(find.text('AL'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sign out'));
+    await tester.pumpAndSettle();
+    expect(picked, 1);
   });
 
   testWidgets('a long title ellipsizes before it reaches the switcher', (tester) async {

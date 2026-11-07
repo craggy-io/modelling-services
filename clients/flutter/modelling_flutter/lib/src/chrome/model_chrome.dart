@@ -130,8 +130,15 @@ abstract class ModelChrome {
     String hint = 'Choose',
   });
 
-  /// An icon that opens a menu of [items].
-  Widget menuButton({Key? key, required IconData icon, required String tooltip, required List<ModelMenuItem> items});
+  /// An icon that opens a menu of [items]. A [badge] (an account's
+  /// initials) shows in a round accent disc in place of the icon.
+  Widget menuButton({
+    Key? key,
+    required IconData icon,
+    required String tooltip,
+    required List<ModelMenuItem> items,
+    String? badge,
+  });
 
   /// A labelled menu (a host's File menu): a ghost button that opens
   /// [entries], with leading icons, shortcut hints, dividers and submenus.

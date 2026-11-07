@@ -10,9 +10,13 @@ The standalone block-model editor ([design](../../docs/design.md) §7.7) for Win
 - **Profile**: the bundled `assets/profiles/android-profile.json`, or none; choosing one is an undoable edit
   of the model's `profile`.
 - **Renderers**: blocks, outline, graph, matrix and table, switched in the workspace toolbar.
+- **Host** (web only): a page that defines `window.modellingHost` (contract 1, design §6.2) adds an account
+  control to the toolbar and, while signed in, saved models: Open lists them first (with delete), Save and Save
+  as write there. Without a host, models live in files.
 - **Gallery**: every renderer on each sample, including a diff (base vs revised) and a findings overlay.
 
 ```bash
 flutter run -d windows   # or -d chrome
 flutter analyze && flutter test && flutter build web && flutter build windows
+flutter test --platform chrome test/web   # the host contract's interop, in a browser
 ```

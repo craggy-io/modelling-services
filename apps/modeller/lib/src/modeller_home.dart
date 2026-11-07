@@ -2,7 +2,9 @@
 // docked inspector, every renderer) over the open model, with the app's
 // File menu (new, templates, import, open, save, save as, export) at the
 // start of its top bar, and connecting an agent and the gallery among its
-// actions, and the craggy.io account at its end. The profile
+// actions, and the host's account at its end. While signed in to a host
+// with a source, Open lists the account's models first and Save and Save
+// as write to the account; otherwise models live in files. The profile
 // picker is the editor's model overview. Unsaved edits are confirmed
 // before they are discarded. A model linked in the page address opens
 // first, unsaved.
@@ -12,16 +14,22 @@ import 'package:modelling/modelling.dart' hide View;
 import 'package:modelling_flutter/modelling_flutter.dart';
 
 import 'account_button.dart';
+import 'account_dialogs.dart';
 import 'agent_dialog.dart';
 import 'gallery_page.dart';
+import 'host.dart';
+import 'host_model_source.dart';
 import 'import_dialog.dart';
 import 'model_link.dart';
 import 'samples.dart';
 
 class ModellerHome extends StatefulWidget {
-  const ModellerHome({super.key, required this.bundled, this.linked = (model: null, error: null)});
+  const ModellerHome({super.key, required this.bundled, this.linked = (model: null, error: null), this.host});
 
   final Bundled bundled;
+
+  /// The page hosting the app, if any (see [ModellingHost]).
+  final ModellingHost? host;
 
   /// The model linked in the page address (see [readLinkedModel]): it
   /// opens as a new unsaved document; an error shows in the status bar.
@@ -36,10 +44,19 @@ class _ModellerHomeState extends State<ModellerHome> {
   final _exportKey = GlobalKey(debugLabel: 'modeller export');
   late LoadedModel _loaded;
   late ModelController _c;
+  VoidCallback? _unwatch;
+  HostUser? _user;
+
+  /// The host's source while a user is signed in, else null (files).
+  HostModelSource? _account;
 
   @override
   void initState() {
     super.initState();
+    _syncAccount();
+    _unwatch = widget.host?.account?.onChange(() {
+      if (mounted) setState(_syncAccount);
+    });
     final (model: linked, error: failed) = widget.linked;
     _loaded = _untitled(linked ?? Model.empty('Untitled model', 'New model'));
     _c = _controllerFor(_loaded, renderer: 'blocks', saved: linked == null)..notice.value = failed;
@@ -59,8 +76,17 @@ class _ModellerHomeState extends State<ModellerHome> {
     saved: saved,
   );
 
+  /// Follows who is signed in; a new user gets a fresh account source.
+  void _syncAccount() {
+    final user = widget.host?.account?.current(), source = widget.host?.source;
+    if (user == _user && (_account == null) == (user == null || source == null)) return;
+    _user = user;
+    _account = user == null || source == null ? null : HostModelSource(source);
+  }
+
   @override
   void dispose() {
+    _unwatch?.call();
     _c.dispose();
     super.dispose();
   }
@@ -101,9 +127,30 @@ class _ModellerHomeState extends State<ModellerHome> {
     await _replaceWith(m == null ? null : _untitled(m));
   }
 
+  /// Signed in, offers the account's models first; else opens a file.
   Future<void> _open() async {
+    final account = _account;
+    if (account == null) return _openFile();
+    final choice = await showAccountOpenDialog(context, account);
+    if (!mounted) return;
+    switch (choice) {
+      case null:
+        return;
+      case OpenFile():
+        await _openFile();
+      case OpenAccountModel(:final id):
+        await _opening(() => account.read(id), account.label);
+    }
+  }
+
+  Future<void> _openFile() => _opening(_source.open, null);
+
+  /// Opens what [load] reads; [label] names the host's source it reads.
+  Future<void> _opening(Future<LoadedModel?> Function() load, String? label) async {
     try {
-      await _replaceWith(await _source.open());
+      await _replaceWith(await load());
+    } on HostError catch (e) {
+      _c.notice.value = 'Could not open: ${describeHostError(e, label ?? '')}';
     } on Object catch (e) {
       _c.notice.value = 'Could not open: $e';
     }
@@ -112,9 +159,52 @@ class _ModellerHomeState extends State<ModellerHome> {
   /// Stores the model and remembers where; the workspace's Save and the
   /// File menu both come here.
   Future<void> _store(List<Op> ops, Model result, {bool asNew = false}) async {
-    final saved = asNew ? await _source.saveAs(_loaded, result) : await _source.save(_loaded, ops, result);
+    final account = _account;
+    final saved = account != null
+        ? await _storeInAccount(account, ops, result, asNew: asNew)
+        : asNew
+        ? await _source.saveAs(_loaded, result)
+        : await _source.save(_loaded, ops, result);
+    if (saved == null || !mounted) return;
     setState(() => _loaded = LoadedModel(model: result, summary: saved, base: _loaded.base));
-    _c.notice.value = 'Saved ${saved.id}.';
+    _c.notice.value = account != null ? 'Saved to ${account.label}.' : 'Saved ${saved.id}.';
+  }
+
+  /// Saves to the account; on a conflict, see [_resolveConflict].
+  /// Failures throw [_SaveFailed].
+  Future<ModelSummary?> _storeInAccount(
+    HostModelSource account,
+    List<Op> ops,
+    Model result, {
+    required bool asNew,
+  }) async {
+    try {
+      return asNew ? await account.saveAs(result) : await account.save(_loaded, ops, result);
+    } on HostError catch (e) {
+      if (e.code != HostErrorCode.conflict) throw _SaveFailed(describeHostError(e, account.label));
+      return _resolveConflict(account, result, e);
+    }
+  }
+
+  /// Asks whether to save [result] as a copy or reload the saved model;
+  /// null after a reload. Cancelling fails with [conflict].
+  Future<ModelSummary?> _resolveConflict(HostModelSource account, Model result, HostError conflict) async {
+    try {
+      final choice = mounted ? await showConflictDialog(context, result.title) : null;
+      switch (choice) {
+        case ConflictChoice.saveCopy:
+          return await account.saveAs(result);
+        case ConflictChoice.reload:
+          final saved = await account.read(_loaded.summary.id);
+          if (mounted) _show(saved);
+          _c.notice.value = 'Reloaded the saved "${saved.model.title}".';
+          return null;
+        case null:
+          throw conflict;
+      }
+    } on HostError catch (e) {
+      throw _SaveFailed(describeHostError(e, account.label));
+    }
   }
 
   Future<void> _save({bool asNew = false}) async {
@@ -147,7 +237,7 @@ class _ModellerHomeState extends State<ModellerHome> {
           onOpenLink: (link) => _c.notice.value = 'Open ${link.model} with File › Open.',
           onEvidence: (ref) => _c.notice.value = 'Evidence ${ref.scheme}:${ref.id}${ref.selector}',
           leading: _menu(),
-          trailing: AccountButton(mayLeave: _mayDiscard),
+          trailing: _accountButton(),
           shortcuts: {ModelKeys.newModel: _newBlank, ModelKeys.open: _open, ModelKeys.saveAs: () => _save(asNew: true)},
           actions: [
             ModelEditorAction(
@@ -167,6 +257,11 @@ class _ModellerHomeState extends State<ModellerHome> {
       ),
     ),
   );
+
+  Widget? _accountButton() {
+    final account = widget.host?.account;
+    return account == null ? null : AccountButton(account: account, user: _user, mayLeave: _mayDiscard);
+  }
 
   /// The File menu, drawn by the editor's chrome like its other menus.
   Widget _menu() => ModelChrome.of(context).menu(
@@ -208,4 +303,14 @@ class _ModellerHomeState extends State<ModellerHome> {
       ),
     ],
   );
+}
+
+/// A failed account save, in words for the user that follow "Could not
+/// save: ".
+class _SaveFailed implements Exception {
+  const _SaveFailed(this.words);
+  final String words;
+
+  @override
+  String toString() => words;
 }

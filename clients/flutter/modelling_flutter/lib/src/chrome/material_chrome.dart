@@ -259,12 +259,59 @@ class MaterialModelChrome extends ModelChrome {
   );
 
   @override
-  Widget menuButton({Key? key, required IconData icon, required String tooltip, required List<ModelMenuItem> items}) =>
-      MaterialMenuAnchor(
-        key: key,
-        entries: items,
-        trigger: (open) => iconButton(icon: icon, tooltip: tooltip, size: ModelButtonSize.md, onPressed: open),
+  Widget menuButton({
+    Key? key,
+    required IconData icon,
+    required String tooltip,
+    required List<ModelMenuItem> items,
+    String? badge,
+  }) => MaterialMenuAnchor(
+    key: key,
+    entries: items,
+    trigger: (open) => badge == null
+        ? iconButton(icon: icon, tooltip: tooltip, size: ModelButtonSize.md, onPressed: open)
+        : _badgeButton(badge, tooltip: tooltip, onPressed: open),
+  );
+
+  /// A round accent disc with [label] in it, the size of a medium icon
+  /// button.
+  static Widget _badgeButton(String label, {required String tooltip, required VoidCallback onPressed}) => Builder(
+    builder: (context) {
+      final t = ModelTheme.of(context);
+      return _material(
+        Tooltip(
+          message: tooltip,
+          child: Semantics(
+            button: true,
+            label: tooltip,
+            excludeSemantics: true,
+            child: SizedBox.square(
+              dimension: 32,
+              child: Center(
+                child: Ink(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(color: t.focus, shape: BoxShape.circle),
+                  child: InkWell(
+                    onTap: onPressed,
+                    customBorder: const CircleBorder(),
+                    hoverColor: t.text.withValues(alpha: 0.12),
+                    child: Center(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        style: t.small.copyWith(color: t.panel, fontWeight: FontWeight.w700, height: 1),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       );
+    },
+  );
 
   @override
   Widget menu({Key? key, required String label, required List<ModelMenuEntry> entries}) => MaterialMenuAnchor(

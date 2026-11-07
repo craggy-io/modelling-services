@@ -412,6 +412,57 @@ abstract interface class ModelSource {
 | `FileModelSource` | `modelling_flutter` | Desktop: `dart:io` + file picker. Web: upload/download through conditional imports, plus browser local storage for recents |
 | `MemoryModelSource` | `modelling` | Tests, the gallery |
 | `LabsModelSource` | **craggy-labs** `ui/` | Over the labs client (`models.*`); lives in labs, not the library |
+| `HostModelSource` | `apps/modeller` | Over the hosting page's `window.modellingHost.source`, while its user is signed in; the app's, not the library's |
+
+#### The host contract (`window.modellingHost`)
+
+The modeller is open source and names no host's API. A page that serves it may define one plain
+JavaScript object before the app starts; the app reads it once, uses it only when `contract === 1`,
+and treats every member as optional. Without it (or off the web) models live in files, exactly as
+before.
+
+```js
+window.modellingHost = {
+  contract: 1,
+  account: {                         // the toolbar's account control
+    current(),                       // {name, email, initials} | null, synchronous
+    signIn(), signOut(),             // signOut returns a Promise
+    openAccount(),
+    onChange(callback),              // returns an unsubscribe function
+  },
+  source: {                          // where saved models live; only used while signed in
+    label,                           // e.g. "My account", shown in Open and Save
+    list(),                          // Promise<[{id, title, subject, updatedAt}]>
+    read(id),                        // Promise<{id, json}>
+    save(id | null, json, summary),  // Promise<{id, title, subject}>; null id = new model
+    remove(id),                      // Promise<void>
+  },
+};
+```
+
+- `json` is the `.model.json` document as text, both ways. The host may store it in any form, but
+  `read` must answer text that decodes to the same model (key order and whitespace don't matter).
+- `summary` is `{title, subject}`, taken from the model. `updatedAt` is an ISO 8601 string.
+- Saves send the whole result model; the ops aren't needed by a whole-document store. Each model's
+  version stays inside the host: `save(id, …)` answers `conflict` when the model changed since this
+  page last read or saved it.
+- `account.current()` must answer synchronously and `onChange` must fire whenever it may have
+  changed (including once the host has loaded after the app started). A source without an account
+  is never used.
+- Errors reject with `{code, message}`, where `code` is one of:
+
+  | Code | Meaning | The app says |
+  | --- | --- | --- |
+  | `conflict` | The model changed in another tab or device | Offers **Save as a copy** or **Reload** |
+  | `quota` | Out of storage | The source is full; delete models from File › Open, then save again |
+  | `too_large` | The model is over the size limit | Too large; export it to a file |
+  | `signed_out` | The session has ended | Sign in again, or export to a file |
+  | `unavailable` | Anything else (also any unknown code or a thrown error) | Not available (with the host's message); try again |
+
+While signed in with a source, **Open** lists the source's models first (each with delete) and
+offers a file after them; **Save** writes to the source (a model that came from a file, a link or a
+template becomes a new model there); **Save as** always makes a new model there. Import and
+Export are unchanged. Signed out, or with no host, Open and Save use files.
 
 "New model" offers: blank, from a template (any model, or a profile's starter), from Mermaid or an
 outline pasted in, from a CSV.
@@ -519,7 +570,8 @@ feature for labs: the model becomes the map that the rest of the lab's data is s
 ### 7.7 `apps/modeller`
 
 A small Flutter app for desktop and the web that uses only the library: open/save files, new from
-template or import, every renderer, the editor, a profile picker. It is the gallery, the manual
+template or import, every renderer, the editor, a profile picker. On the web, a hosting page may add
+an account and saved models through the host contract (§6.2). It is the gallery, the manual
 test bed and the screenshot source for docs, and it gives the library a second real consumer.
 It is deliberately thin; if it starts growing features, they belong in the package.
 

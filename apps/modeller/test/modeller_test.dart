@@ -1,32 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
-import 'package:modeller/src/modeller_app.dart';
-import 'package:modeller/src/samples.dart';
 
-Finder title(String text) =>
-    find.byWidgetPredicate((w) => w is Text && w.key == const ValueKey('editor-title') && w.data == text);
-
-final dirty = find.byKey(const ValueKey('editor-dirty'));
-
-Finder counts(String text) =>
-    find.byWidgetPredicate((w) => w is Text && w.key == const ValueKey('editor-counts') && w.data == text);
-
-Future<void> boot(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(1500, 1000);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-  final bundled = await tester.runAsync(() => Bundled.load(rootBundle));
-  await tester.pumpWidget(ModellerApp(bundled: bundled!));
-  await tester.pumpAndSettle();
-}
-
-Future<void> menu(WidgetTester tester, List<String> path) async {
-  for (final item in path) {
-    await tester.tap(find.text(item).last);
-    await tester.pumpAndSettle();
-  }
-}
+import 'harness.dart';
 
 Future<void> renderer(WidgetTester tester, String id) async {
   await tester.tap(find.byKey(ValueKey('renderer-$id')).first);

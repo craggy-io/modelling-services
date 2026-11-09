@@ -3,7 +3,7 @@ module github.com/craggy-io/modelling-services
 go 1.27.0
 
 require (
-	github.com/craggy-io/capability-services v0.3.2-0.20261107163912-cc133a193044
+	github.com/craggy-io/capability-services v0.3.2-0.20261107163912-0ea4170fef3b
 	github.com/craggy-io/foundation-kit v0.0.0-20261107163733-af7e17b71fd2
 	github.com/google/jsonschema-go v0.4.3
 	github.com/modelcontextprotocol/go-sdk v1.8.0

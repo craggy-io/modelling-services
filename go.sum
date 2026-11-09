@@ -1,5 +1,5 @@
-github.com/craggy-io/capability-services v0.3.2-0.20261107163912-cc133a193044 h1:CqFvTqWxtX9kWZp2TXv51kfA5HppD5Vxs612d/GfrRc=
-github.com/craggy-io/capability-services v0.3.2-0.20261107163912-cc133a193044/go.mod h1:Q2LlVzMz+OrYOcF1uK70Nf2qu3K3pS9rvSiDbuyeFIY=
+github.com/craggy-io/capability-services v0.3.2-0.20261107163912-0ea4170fef3b h1:fGVFpAHNkIB6fx9GODu+Lc0QkJ2Ft0NIQt4M2Nkgoas=
+github.com/craggy-io/capability-services v0.3.2-0.20261107163912-0ea4170fef3b/go.mod h1:Q2LlVzMz+OrYOcF1uK70Nf2qu3K3pS9rvSiDbuyeFIY=
 github.com/craggy-io/foundation-kit v0.0.0-20261107163733-af7e17b71fd2 h1:G4Hyxfpn/VvYdrPhBEzR4zRjQ20ZcOR3kAKma0miToU=
 github.com/craggy-io/foundation-kit v0.0.0-20261107163733-af7e17b71fd2/go.mod h1:grT6r7EVfoxyZ6/GiQuocUvqLOCAsMSh5oOwdzwuHdg=
 github.com/dlclark/regexp2 v1.11.0 h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxKI=
